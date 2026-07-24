@@ -16,11 +16,11 @@ No confirmed deprecated OpenAI model usage was found.
 
 | Location | Model | Basis |
 | --- | --- | --- |
-| `fixture/clean-project/appsettings.json:3` | `gpt-realtime-2.1` | Present as a recommended replacement in the catalog and not listed as deprecated. |
-| `fixture/clean-project/appsettings.json:4` | `gpt-audio-1.5` | Present as a recommended replacement in the catalog and not listed as deprecated. |
-| `fixture/clean-project/service.ts:2` | `gpt-4o-mini` | Modern current model and not listed as deprecated in the catalog. |
-| `fixture/clean-project/config.yaml:2` | `gpt-4o-mini` | Modern current model and not listed as deprecated in the catalog. |
-| `fixture/clean-project/.env.example:2` | `gpt-4o-mini` | Modern current model and not listed as deprecated in the catalog. |
+| `fixture/clean-project/appsettings.json:3` | `gpt-realtime-2.1` | Listed as `recommended_replacement` in `openai-deprecations.json`. |
+| `fixture/clean-project/appsettings.json:4` | `gpt-audio-1.5` | Listed as `recommended_replacement` in `openai-deprecations.json`. |
+| `fixture/clean-project/service.ts:2` | `gpt-audio-1.5` | Listed as `recommended_replacement` in `openai-deprecations.json`. |
+| `fixture/clean-project/config.yaml:2` | `gpt-realtime-2.1-mini` | Listed as `recommended_replacement` in `openai-deprecations.json`. |
+| `fixture/clean-project/.env.example:2` | `gpt-4o-mini-transcribe-2025-12-15` | Listed as `recommended_replacement` in `openai-deprecations.json`. |
 
 ## Unresolved Dynamic Usage
 

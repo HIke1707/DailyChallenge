@@ -1,2 +1,2 @@
 openai:
-  model: "gpt-4o-mini"
+  model: "gpt-realtime-2.1-mini"
