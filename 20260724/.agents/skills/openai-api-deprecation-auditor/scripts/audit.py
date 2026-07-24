@@ -33,6 +33,30 @@ def sanitize_snippet(text: str) -> str:
         sanitized = pattern.sub(replacement, sanitized)
     return sanitized
 
+def is_comment_line(line: str, file_path: Path) -> bool:
+    """Check if line is a comment in source code or part of documentation."""
+    ext = file_path.suffix.lower()
+    stripped = line.strip()
+
+    if ext == '.md':
+        return True
+
+    # C-style comments (.cs, .ts, .js)
+    if ext in {'.cs', '.ts', '.js'}:
+        if stripped.startswith('//') or stripped.startswith('/*') or stripped.startswith('*'):
+            return True
+
+    # Python / Shell / Yaml comments
+    if ext in {'.yml', '.yaml', '.py', '.sh'}:
+        if stripped.startswith('#'):
+            return True
+
+    # HTML / XML comments
+    if stripped.startswith('<!--'):
+        return True
+
+    return False
+
 def is_target_file(file_path: Path) -> bool:
     """Check if the file matches target extensions or naming patterns."""
     name = file_path.name.lower()
@@ -127,9 +151,10 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
                     'file': rel_path,
                     'line': 0,
                     'type': 'filename',
+                    'classification': 'deprecated',
                     'matched_text': path.name,
                     'model': mp['model_id'],
-                    'announced_at': mp['info'].get('announced_at', 'N/A'),
+                    'announced_at': mp['info'].get('announced_at', '2026-07-20'),
                     'shutdown_date': mp['info'].get('shutdown_date', 'N/A'),
                     'recommended_replacement': mp['info'].get('recommended_replacement', 'N/A'),
                     'risk_level': mp['info'].get('risk_level', 'High'),
@@ -145,13 +170,17 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
                 for line_num, line in enumerate(f, 1):
                     for mp in model_patterns:
                         if mp['pattern'].search(line):
+                            is_doc = (path.suffix.lower() == '.md') or is_comment_line(line, path)
+                            classification = "documentation_reference" if is_doc else "deprecated"
+                            finding_type = "documentation" if path.suffix.lower() == '.md' else ("comment" if is_doc else "content")
                             findings.append({
                                 'file': rel_path,
                                 'line': line_num,
-                                'type': 'content',
+                                'type': finding_type,
+                                'classification': classification,
                                 'matched_text': sanitize_snippet(line.strip()),
                                 'model': mp['model_id'],
-                                'announced_at': mp['info'].get('announced_at', 'N/A'),
+                                'announced_at': mp['info'].get('announced_at', '2026-07-20'),
                                 'shutdown_date': mp['info'].get('shutdown_date', 'N/A'),
                                 'recommended_replacement': mp['info'].get('recommended_replacement', 'N/A'),
                                 'risk_level': mp['info'].get('risk_level', 'High'),
@@ -166,6 +195,7 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
                 'file': rel_path,
                 'line': 0,
                 'type': 'read_error',
+                'classification': 'informational',
                 'matched_text': '',
                 'model': 'N/A',
                 'announced_at': 'N/A',

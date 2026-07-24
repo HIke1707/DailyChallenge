@@ -5,7 +5,7 @@
   "deprecations": [
     {
       "model": "gpt-realtime",
-      "announced_at": "2025-01-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-realtime-2.1",
       "category": "Realtime API",
@@ -16,7 +16,7 @@
     },
     {
       "model": "gpt-audio",
-      "announced_at": "2025-01-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-audio-1.5",
       "category": "Audio API",
@@ -27,7 +27,7 @@
     },
     {
       "model": "gpt-4o-audio",
-      "announced_at": "2025-01-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-audio-1.5",
       "category": "Audio API",
@@ -38,7 +38,7 @@
     },
     {
       "model": "gpt-4o-realtime",
-      "announced_at": "2025-01-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-realtime-2.1",
       "category": "Realtime API",
@@ -49,7 +49,7 @@
     },
     {
       "model": "gpt-realtime-mini",
-      "announced_at": "2025-01-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-realtime-2.1-mini",
       "category": "Realtime API",
@@ -60,7 +60,7 @@
     },
     {
       "model": "gpt-audio-mini",
-      "announced_at": "2025-01-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-audio-1.5",
       "category": "Audio API",
@@ -71,7 +71,7 @@
     },
     {
       "model": "gpt-4o-mini-realtime",
-      "announced_at": "2025-01-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-realtime-2.1-mini",
       "category": "Realtime API",
@@ -82,7 +82,7 @@
     },
     {
       "model": "gpt-4o-mini-audio",
-      "announced_at": "2025-01-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-audio-1.5",
       "category": "Audio API",
@@ -93,7 +93,7 @@
     },
     {
       "model": "gpt-4o-mini-transcribe-2025-03-20",
-      "announced_at": "2025-03-20",
+      "announced_at": "2026-07-20",
       "shutdown_date": "2027-01-20",
       "recommended_replacement": "gpt-4o-mini-transcribe-2025-12-15",
       "category": "Audio API",

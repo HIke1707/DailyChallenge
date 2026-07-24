@@ -158,6 +158,30 @@ class TestOpenAIAudit(unittest.TestCase):
         self.assertNotIn("sk-proj-myrealapikey98765", env_finding["matched_text"])
         self.assertIn("***REDACTED***", json_finding["matched_text"])
 
+    def test_deterministic_classification_and_doc_reference(self):
+        # 1. Executable code file with deprecated model
+        code_file = self.root_path / "app.cs"
+        code_file.write_text('// Note: Previously used gpt-realtime in legacy code.\nstring model = "gpt-realtime";', encoding="utf-8")
+
+        # 2. Documentation file with historical reference
+        doc_file = self.root_path / "README.md"
+        doc_file.write_text('The application previously used `gpt-realtime`.', encoding="utf-8")
+
+        findings = audit_directory(self.root_path, self.deprecations_path)
+
+        app_cs_findings = [f for f in findings if f["file"] == "app.cs"]
+        readme_findings = [f for f in findings if f["file"] == "README.md"]
+
+        self.assertEqual(len(app_cs_findings), 2)
+        # Line 1 (comment) -> documentation_reference
+        self.assertEqual(app_cs_findings[0]["classification"], "documentation_reference")
+        # Line 2 (code) -> deprecated
+        self.assertEqual(app_cs_findings[1]["classification"], "deprecated")
+
+        # README.md -> documentation_reference
+        self.assertEqual(len(readme_findings), 1)
+        self.assertEqual(readme_findings[0]["classification"], "documentation_reference")
+
 if __name__ == "__main__":
     unittest.main()
 
