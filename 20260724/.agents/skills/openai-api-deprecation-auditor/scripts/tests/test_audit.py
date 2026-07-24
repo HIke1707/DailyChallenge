@@ -96,5 +96,49 @@ class TestOpenAIAudit(unittest.TestCase):
         self.assertIn("gpt-4o.ts", files_found)
         self.assertNotIn("config.json", files_found)
 
+    def test_ignore_bin_and_obj_directories(self):
+        bin_dir = self.root_path / "bin"
+        bin_dir.mkdir()
+        (bin_dir / "app.cs").write_text('const string model = "gpt-4o";', encoding="utf-8")
+
+        obj_dir = self.root_path / "obj"
+        obj_dir.mkdir()
+        (obj_dir / "app.cs").write_text('const string model = "gpt-4o";', encoding="utf-8")
+
+        findings = audit_directory(self.root_path, self.deprecations_path)
+        files_found = [f["file"] for f in findings]
+
+        self.assertNotIn("bin/app.cs", files_found)
+        self.assertNotIn("obj/app.cs", files_found)
+
+    def test_ts_yaml_env_scanning(self):
+        (self.root_path / "service.ts").write_text('const model = "gpt-4o";', encoding="utf-8")
+        (self.root_path / "config.yaml").write_text('openai:\n  model: "gpt-4o"', encoding="utf-8")
+        (self.root_path / ".env").write_text('OPENAI_MODEL=gpt-4o\nOPENAI_API_KEY=sk-placeholder', encoding="utf-8")
+        (self.root_path / "settings.example").write_text('OPENAI_MODEL=gpt-4o', encoding="utf-8")
+
+        findings = audit_directory(self.root_path, self.deprecations_path)
+        files_found = [f["file"] for f in findings]
+
+        self.assertIn("service.ts", files_found)
+        self.assertIn("config.yaml", files_found)
+        self.assertIn(".env", files_found)
+        self.assertIn("settings.example", files_found)
+
+    def test_read_error_handling(self):
+        unreadable_file = self.root_path / "unreadable.cs"
+        unreadable_file.write_text('const model = "gpt-4o";', encoding="utf-8")
+        # Make file unreadable
+        unreadable_file.chmod(0000)
+
+        try:
+            findings = audit_directory(self.root_path, self.deprecations_path)
+            error_findings = [f for f in findings if f.get("type") == "read_error"]
+            self.assertTrue(len(error_findings) > 0)
+            self.assertEqual(error_findings[0]["file"], "unreadable.cs")
+        finally:
+            unreadable_file.chmod(0o644)
+
 if __name__ == "__main__":
     unittest.main()
+

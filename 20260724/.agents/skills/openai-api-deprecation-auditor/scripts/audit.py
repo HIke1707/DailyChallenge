@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import json
 import argparse
 from pathlib import Path
@@ -9,6 +10,8 @@ TARGET_EXTENSIONS = {'.cs', '.ts', '.js', '.json', '.yml', '.yaml', '.env', '.ex
 
 # Default reference path relative to this script
 DEFAULT_DEPRECATIONS_PATH = Path(__file__).resolve().parent.parent / "references" / "openai-deprecations.json"
+
+DEFAULT_IGNORE_DIRS = {'.git', 'node_modules', '__pycache__', '.venv', 'venv', 'bin', 'obj'}
 
 def is_target_file(file_path: Path) -> bool:
     """Check if the file matches target extensions or naming patterns."""
@@ -40,7 +43,7 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
     Scan target directory for deprecated OpenAI model IDs in filenames and file contents.
     """
     if ignore_dirs is None:
-        ignore_dirs = {'.git', 'node_modules', '__pycache__', '.venv', 'venv'}
+        ignore_dirs = DEFAULT_IGNORE_DIRS
 
     root_dir = Path(root_dir).resolve()
     deprecations_path = Path(deprecations_path).resolve()
@@ -108,8 +111,18 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
                                 'shutdown_date': mp['info'].get('shutdown_date'),
                                 'recommended_replacement': mp['info'].get('recommended_replacement')
                             })
-        except Exception:
-            pass
+        except Exception as e:
+            sys.stderr.write(f"Warning: Failed to read file {rel_path}: {e}\n")
+            findings.append({
+                'file': rel_path,
+                'line': 0,
+                'type': 'read_error',
+                'matched_text': '',
+                'model': 'N/A',
+                'shutdown_date': None,
+                'recommended_replacement': None,
+                'error': str(e)
+            })
 
     return findings
 
@@ -133,8 +146,13 @@ def main():
             print("✅ No deprecated OpenAI models found.")
             return
 
-        print(f"⚠️  Found {len(findings)} occurrence(s) of deprecated OpenAI models:\n")
+        print(f"⚠️  Found {len(findings)} occurrence(s) of deprecated OpenAI models or scan issues:\n")
         for f in findings:
+            if f.get('type') == 'read_error':
+                print(f"- Location: {f['file']} (read error)")
+                print(f"  Error: {f.get('error')}")
+                print()
+                continue
             location = f"{f['file']}:{f['line']}" if f['line'] > 0 else f"{f['file']} (filename)"
             print(f"- Location: {location}")
             print(f"  Model: {f['model']} (Shutdown: {f['shutdown_date']}) -> Replace with: {f['recommended_replacement']}")
