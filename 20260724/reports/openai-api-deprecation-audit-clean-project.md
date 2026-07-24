@@ -5,6 +5,8 @@
 - Scope: `fixture/clean-project` audited as the existing workspace fixture.
 - Mode: read-only audit. No source files in the target project were modified.
 - Catalog: `.agents/skills/openai-api-deprecation-auditor/references/openai-deprecations.json` is present and populated.
+- Catalog Version: `2026.07.24` (Checked At: `2026-07-24`)
+- Catalog Coverage Statement: 本稽核僅涵蓋記錄於此 Catalog 內之 OpenAI API 棄用模型及項目，未包含於本 Catalog 內之模型不在此自動稽核判定範圍內。
 - Scanner result: deterministic scanner exited `0` and returned an empty JSON array across `.cs`, `.json`, `.yaml`, `.env.example`, and `.ts` files.
 - Manual review: no deprecated, unresolved dynamic, wrapper-indirect, or documentation-only model references were found.
 

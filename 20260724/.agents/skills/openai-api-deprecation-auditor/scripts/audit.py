@@ -23,12 +23,29 @@ def is_target_file(file_path: Path) -> bool:
         return True
     return False
 
-def load_deprecations(deprecations_path: Path) -> list:
-    """Load deprecated models list from JSON reference file."""
+def load_deprecations(deprecations_path: Path) -> tuple:
+    """Load deprecated models list and catalog metadata from JSON reference file."""
     if not deprecations_path.exists():
         raise FileNotFoundError(f"Deprecations file not found: {deprecations_path}")
     with open(deprecations_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+        data = json.load(f)
+
+    if isinstance(data, dict):
+        metadata = {
+            'version': data.get('version', 'unknown'),
+            'checked_at': data.get('checked_at', 'unknown'),
+            'coverage_statement': data.get('coverage_statement', '本稽核僅涵蓋記錄於此 Catalog 內之 OpenAI 模型與 API 棄用項目，未包含於本 Catalog 內之模型不在此自動稽核判定範圍內。')
+        }
+        deprecations = data.get('deprecations', [])
+    else:
+        metadata = {
+            'version': 'unknown',
+            'checked_at': 'unknown',
+            'coverage_statement': '本稽核僅涵蓋記錄於此 Catalog 內之 OpenAI 模型與 API 棄用項目，未包含於本 Catalog 內之模型不在此自動稽核判定範圍內。'
+        }
+        deprecations = data
+
+    return deprecations, metadata
 
 def build_model_regex(model_id: str) -> re.Pattern:
     """
@@ -47,7 +64,7 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
 
     root_dir = Path(root_dir).resolve()
     deprecations_path = Path(deprecations_path).resolve()
-    deprecations = load_deprecations(deprecations_path)
+    deprecations, catalog_meta = load_deprecations(deprecations_path)
 
     model_patterns = []
     for item in deprecations:
@@ -92,8 +109,14 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
                     'type': 'filename',
                     'matched_text': path.name,
                     'model': mp['model_id'],
-                    'shutdown_date': mp['info'].get('shutdown_date'),
-                    'recommended_replacement': mp['info'].get('recommended_replacement')
+                    'announced_at': mp['info'].get('announced_at', 'N/A'),
+                    'shutdown_date': mp['info'].get('shutdown_date', 'N/A'),
+                    'recommended_replacement': mp['info'].get('recommended_replacement', 'N/A'),
+                    'risk_level': mp['info'].get('risk_level', 'High'),
+                    'requires_manual_verification': mp['info'].get('requires_manual_verification', False),
+                    'confidence': mp['info'].get('confidence', 'High'),
+                    'catalog_version': catalog_meta['version'],
+                    'catalog_coverage_statement': catalog_meta['coverage_statement']
                 })
 
         # 2. Scan file content
@@ -108,8 +131,14 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
                                 'type': 'content',
                                 'matched_text': line.strip(),
                                 'model': mp['model_id'],
-                                'shutdown_date': mp['info'].get('shutdown_date'),
-                                'recommended_replacement': mp['info'].get('recommended_replacement')
+                                'announced_at': mp['info'].get('announced_at', 'N/A'),
+                                'shutdown_date': mp['info'].get('shutdown_date', 'N/A'),
+                                'recommended_replacement': mp['info'].get('recommended_replacement', 'N/A'),
+                                'risk_level': mp['info'].get('risk_level', 'High'),
+                                'requires_manual_verification': mp['info'].get('requires_manual_verification', False),
+                                'confidence': mp['info'].get('confidence', 'High'),
+                                'catalog_version': catalog_meta['version'],
+                                'catalog_coverage_statement': catalog_meta['coverage_statement']
                             })
         except Exception as e:
             sys.stderr.write(f"Warning: Failed to read file {rel_path}: {e}\n")
@@ -119,8 +148,14 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
                 'type': 'read_error',
                 'matched_text': '',
                 'model': 'N/A',
-                'shutdown_date': None,
-                'recommended_replacement': None,
+                'announced_at': 'N/A',
+                'shutdown_date': 'N/A',
+                'recommended_replacement': 'N/A',
+                'risk_level': 'N/A',
+                'requires_manual_verification': True,
+                'confidence': 'Low',
+                'catalog_version': catalog_meta['version'],
+                'catalog_coverage_statement': catalog_meta['coverage_statement'],
                 'error': str(e)
             })
 

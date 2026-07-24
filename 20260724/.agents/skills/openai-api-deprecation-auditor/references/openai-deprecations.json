@@ -1,47 +1,106 @@
-[
+{
+  "version": "2026.07.24",
+  "checked_at": "2026-07-24",
+  "coverage_statement": "本稽核僅涵蓋記錄於此 Catalog 內之 OpenAI API 棄用模型及項目，未包含於本 Catalog 內之模型不在此自動稽核判定範圍內。",
+  "deprecations": [
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-realtime",
-        "recommended_replacement": "gpt-realtime-2.1"
+      "model": "gpt-realtime",
+      "announced_at": "2025-01-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-realtime-2.1",
+      "category": "Realtime API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     },
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-audio",
-        "recommended_replacement": "gpt-audio-1.5"
+      "model": "gpt-audio",
+      "announced_at": "2025-01-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-audio-1.5",
+      "category": "Audio API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     },
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-4o-audio",
-        "recommended_replacement": "gpt-audio-1.5"
+      "model": "gpt-4o-audio",
+      "announced_at": "2025-01-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-audio-1.5",
+      "category": "Audio API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     },
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-4o-realtime",
-        "recommended_replacement": "gpt-realtime-2.1"
+      "model": "gpt-4o-realtime",
+      "announced_at": "2025-01-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-realtime-2.1",
+      "category": "Realtime API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     },
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-realtime-mini",
-        "recommended_replacement": "gpt-realtime-2.1-mini"
+      "model": "gpt-realtime-mini",
+      "announced_at": "2025-01-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-realtime-2.1-mini",
+      "category": "Realtime API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     },
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-audio-mini",
-        "recommended_replacement": "gpt-audio-1.5"
+      "model": "gpt-audio-mini",
+      "announced_at": "2025-01-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-audio-1.5",
+      "category": "Audio API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     },
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-4o-mini-realtime",
-        "recommended_replacement": "gpt-realtime-2.1-mini"
+      "model": "gpt-4o-mini-realtime",
+      "announced_at": "2025-01-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-realtime-2.1-mini",
+      "category": "Realtime API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     },
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-4o-mini-audio",
-        "recommended_replacement": "gpt-audio-1.5"
+      "model": "gpt-4o-mini-audio",
+      "announced_at": "2025-01-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-audio-1.5",
+      "category": "Audio API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     },
     {
-        "shutdown_date": "2027-01-20",
-        "model": "gpt-4o-mini-transcribe-2025-03-20",
-        "recommended_replacement": "gpt-4o-mini-transcribe-2025-12-15"
+      "model": "gpt-4o-mini-transcribe-2025-03-20",
+      "announced_at": "2025-03-20",
+      "shutdown_date": "2027-01-20",
+      "recommended_replacement": "gpt-4o-mini-transcribe-2025-12-15",
+      "category": "Audio API",
+      "risk_level": "High",
+      "requires_manual_verification": false,
+      "confidence": "High",
+      "source": "https://platform.openai.com/docs/deprecations"
     }
-]
+  ]
+}

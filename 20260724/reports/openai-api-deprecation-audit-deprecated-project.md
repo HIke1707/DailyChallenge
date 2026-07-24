@@ -5,19 +5,21 @@
 - Scope: `fixture/deprecated-project` audited as the existing workspace fixture.
 - Mode: read-only audit. No source files in the target project were modified.
 - Catalog: `.agents/skills/openai-api-deprecation-auditor/references/openai-deprecations.json` is present and populated.
+- Catalog Version: `2026.07.24` (Checked At: `2026-07-24`)
+- Catalog Coverage Statement: 本稽核僅涵蓋記錄於此 Catalog 內之 OpenAI API 棄用模型及項目，未包含於本 Catalog 內之模型不在此自動稽核判定範圍內。
 - Scanner result: deterministic scanner exited `0` and returned 6 confirmed deprecated model usages across `.cs`, `.json`, `.yaml`, `.env`, and `.ts` files. Directories `bin/` and `obj/` were automatically excluded.
 - Manual review: no unresolved dynamic model construction, wrapper indirection, or documentation-only historical references were found.
 
 ## Confirmed Deprecated Usage
 
-| Location | Deprecated Model | Shutdown Date | Recommended Replacement | Source Snippet |
-| --- | --- | --- | --- | --- |
-| `fixture/deprecated-project/OpenAIService.cs:5` | `gpt-4o-audio` | `2027-01-20` | `gpt-audio-1.5` | `private const string AudioModel = "gpt-4o-audio";` |
-| `fixture/deprecated-project/appsettings.json:3` | `gpt-realtime` | `2027-01-20` | `gpt-realtime-2.1` | `"RealtimeModel": "gpt-realtime",` |
-| `fixture/deprecated-project/appsettings.json:4` | `gpt-4o-mini-transcribe-2025-03-20` | `2027-01-20` | `gpt-4o-mini-transcribe-2025-12-15` | `"TranscriptionModel": "gpt-4o-mini-transcribe-2025-03-20"` |
-| `fixture/deprecated-project/config.yaml:2` | `gpt-realtime-mini` | `2027-01-20` | `gpt-realtime-2.1-mini` | `model: "gpt-realtime-mini"` |
-| `fixture/deprecated-project/.env:2` | `gpt-4o-realtime` | `2027-01-20` | `gpt-realtime-2.1` | `OPENAI_MODEL=gpt-4o-realtime` |
-| `fixture/deprecated-project/service.ts:2` | `gpt-audio` | `2027-01-20` | `gpt-audio-1.5` | `private readonly model: string = "gpt-audio";` |
+| Location | Deprecated Model | Announced Date | Shutdown Date | Risk Level | Recommended Replacement | Requires Manual Verification | Confidence | Source Snippet |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `fixture/deprecated-project/OpenAIService.cs:5` | `gpt-4o-audio` | `2025-01-20` | `2027-01-20` | `High` | `gpt-audio-1.5` | `false` | `High` | `private const string AudioModel = "gpt-4o-audio";` |
+| `fixture/deprecated-project/appsettings.json:3` | `gpt-realtime` | `2025-01-20` | `2027-01-20` | `High` | `gpt-realtime-2.1` | `false` | `High` | `"RealtimeModel": "gpt-realtime",` |
+| `fixture/deprecated-project/appsettings.json:4` | `gpt-4o-mini-transcribe-2025-03-20` | `2025-03-20` | `2027-01-20` | `High` | `gpt-4o-mini-transcribe-2025-12-15` | `false` | `High` | `"TranscriptionModel": "gpt-4o-mini-transcribe-2025-03-20"` |
+| `fixture/deprecated-project/config.yaml:2` | `gpt-realtime-mini` | `2025-01-20` | `2027-01-20` | `High` | `gpt-realtime-2.1-mini` | `false` | `High` | `model: "gpt-realtime-mini"` |
+| `fixture/deprecated-project/.env:2` | `gpt-4o-realtime` | `2025-01-20` | `2027-01-20` | `High` | `gpt-realtime-2.1` | `false` | `High` | `OPENAI_MODEL=gpt-4o-realtime` |
+| `fixture/deprecated-project/service.ts:2` | `gpt-audio` | `2025-01-20` | `2027-01-20` | `High` | `gpt-audio-1.5` | `false` | `High` | `private readonly model: string = "gpt-audio";` |
 
 ## Confirmed Safe Usage
 
