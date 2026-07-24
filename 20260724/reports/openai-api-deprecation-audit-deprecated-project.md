@@ -7,7 +7,8 @@
 - Catalog: `.agents/skills/openai-api-deprecation-auditor/references/openai-deprecations.json` is present and populated.
 - Catalog Version: `2026.07.24` (Checked At: `2026-07-24`)
 - Catalog Coverage Statement: 本稽核僅涵蓋記錄於此 Catalog 內之 OpenAI API 棄用模型及項目，未包含於本 Catalog 內之模型不在此自動稽核判定範圍內。
-- Scanner result: deterministic scanner exited `0` and returned 6 confirmed deprecated model usages across `.cs`, `.json`, `.yaml`, `.env`, and `.ts` files. Directories `bin/` and `obj/` were automatically excluded.
+- Security Statement: Scanner 具備金鑰自動脫敏與防洩漏機制 (Secret Sanitization / Redaction)，所有程式碼片段中的 API Key 及機密資料均已自動轉為 `***REDACTED***`。
+- Scanner result: deterministic scanner exited `0` and returned 7 confirmed deprecated model usages across `.cs`, `.json`, `.yaml`, `.env`, and `.ts` files. Directories `bin/` and `obj/` were automatically excluded.
 - Manual review: no unresolved dynamic model construction, wrapper indirection, or documentation-only historical references were found.
 
 ## Confirmed Deprecated Usage
@@ -15,6 +16,7 @@
 | Location | Deprecated Model | Announced Date | Shutdown Date | Risk Level | Recommended Replacement | Requires Manual Verification | Confidence | Source Snippet |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `fixture/deprecated-project/OpenAIService.cs:5` | `gpt-4o-audio` | `2025-01-20` | `2027-01-20` | `High` | `gpt-audio-1.5` | `false` | `High` | `private const string AudioModel = "gpt-4o-audio";` |
+| `fixture/deprecated-project/secret_config.json:2` | `gpt-realtime` | `2025-01-20` | `2027-01-20` | `High` | `gpt-realtime-2.1` | `false` | `High` | `"OPENAI_API_KEY": "***REDACTED***", "RealtimeModel": "gpt-realtime"` |
 | `fixture/deprecated-project/appsettings.json:3` | `gpt-realtime` | `2025-01-20` | `2027-01-20` | `High` | `gpt-realtime-2.1` | `false` | `High` | `"RealtimeModel": "gpt-realtime",` |
 | `fixture/deprecated-project/appsettings.json:4` | `gpt-4o-mini-transcribe-2025-03-20` | `2025-03-20` | `2027-01-20` | `High` | `gpt-4o-mini-transcribe-2025-12-15` | `false` | `High` | `"TranscriptionModel": "gpt-4o-mini-transcribe-2025-03-20"` |
 | `fixture/deprecated-project/config.yaml:2` | `gpt-realtime-mini` | `2025-01-20` | `2027-01-20` | `High` | `gpt-realtime-2.1-mini` | `false` | `High` | `model: "gpt-realtime-mini"` |
@@ -36,7 +38,7 @@ No documentation-only or comment-only historical references were found.
 ## Recommended Migration Order
 
 1. Replace `gpt-4o-audio` in `fixture/deprecated-project/OpenAIService.cs:5` with `gpt-audio-1.5`.
-2. Replace `gpt-realtime` in `fixture/deprecated-project/appsettings.json:3` with `gpt-realtime-2.1`.
+2. Replace `gpt-realtime` in `fixture/deprecated-project/secret_config.json:2` and `appsettings.json:3` with `gpt-realtime-2.1`.
 3. Replace `gpt-4o-mini-transcribe-2025-03-20` in `fixture/deprecated-project/appsettings.json:4` with `gpt-4o-mini-transcribe-2025-12-15`.
 4. Replace `gpt-realtime-mini` in `fixture/deprecated-project/config.yaml:2` with `gpt-realtime-2.1-mini`.
 5. Replace `gpt-4o-realtime` in `fixture/deprecated-project/.env:2` with `gpt-realtime-2.1`.
@@ -46,14 +48,16 @@ These replacements are limited to the provided deprecation catalog. No model nam
 
 ## Evidence and Limitations
 
-- Deterministic scanner command returned JSON with 6 findings and exit code `0`.
+- Deterministic scanner command returned JSON with 7 findings and exit code `0`.
 - Ignored directories (`bin/`, `obj/`, `.git`, `node_modules`, `__pycache__`, `.venv`, `venv`) were excluded from scanning.
+- Secret Sanitization Mechanism: All API keys, tokens, passwords, and sensitive credentials are automatically redacted as `***REDACTED***` in source snippets.
 - File read errors (if any) are logged to stderr and captured as `type: 'read_error'` findings.
 - The audit is based only on files available locally and the provided catalog.
 
 ## Files Inspected
 
 - `fixture/deprecated-project/OpenAIService.cs`
+- `fixture/deprecated-project/secret_config.json`
 - `fixture/deprecated-project/appsettings.json`
 - `fixture/deprecated-project/config.yaml`
 - `fixture/deprecated-project/.env`

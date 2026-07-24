@@ -13,6 +13,26 @@ DEFAULT_DEPRECATIONS_PATH = Path(__file__).resolve().parent.parent / "references
 
 DEFAULT_IGNORE_DIRS = {'.git', 'node_modules', '__pycache__', '.venv', 'venv', 'bin', 'obj'}
 
+SECRET_PATTERNS = [
+    # 1. Any sk- prefixed API keys (sk-..., sk-proj-..., sk-svcacct-..., etc.)
+    (re.compile(r'sk-(?:proj-|svcacct-|admin-)?[a-zA-Z0-9_\-]{3,}'), 'sk-***REDACTED***'),
+    # 2. JSON key-value pairs e.g. "OPENAI_API_KEY": "secret_val"
+    (re.compile(r'(?i)(["\'](?:[a-z0-9_-]*key|[a-z0-9_-]*secret|[a-z0-9_-]*token|password|passwd|auth)["\']\s*:\s*["\'])([^"\'\s]+)(["\'])'), r'\1***REDACTED***\3'),
+    # 3. Key-Value assignment e.g. OPENAI_API_KEY=secret_val or apiKey = "secret_val"
+    (re.compile(r'(?i)([a-z0-9_-]*key|[a-z0-9_-]*secret|[a-z0-9_-]*token|password|passwd|auth)\s*([:=])\s*(["\']?)([^"\'\s,;{}]+)(["\']?)'), r'\1 \2 \3***REDACTED***\5'),
+    # 4. Bearer authorization headers
+    (re.compile(r'(?i)(Bearer)\s+[a-zA-Z0-9_\-\.=]+'), r'\1 ***REDACTED***')
+]
+
+def sanitize_snippet(text: str) -> str:
+    """Mask sensitive keys, tokens, and secrets in code snippets to prevent credential leaks."""
+    if not text:
+        return text
+    sanitized = text
+    for pattern, replacement in SECRET_PATTERNS:
+        sanitized = pattern.sub(replacement, sanitized)
+    return sanitized
+
 def is_target_file(file_path: Path) -> bool:
     """Check if the file matches target extensions or naming patterns."""
     name = file_path.name.lower()
@@ -129,7 +149,7 @@ def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIO
                                 'file': rel_path,
                                 'line': line_num,
                                 'type': 'content',
-                                'matched_text': line.strip(),
+                                'matched_text': sanitize_snippet(line.strip()),
                                 'model': mp['model_id'],
                                 'announced_at': mp['info'].get('announced_at', 'N/A'),
                                 'shutdown_date': mp['info'].get('shutdown_date', 'N/A'),

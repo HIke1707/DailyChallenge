@@ -139,6 +139,25 @@ class TestOpenAIAudit(unittest.TestCase):
         finally:
             unreadable_file.chmod(0o644)
 
+    def test_secret_redaction_in_matched_text(self):
+        # Test JSON containing API key and deprecated model
+        json_file = self.root_path / "secret.json"
+        json_file.write_text('{"OPENAI_API_KEY":"sk-secret-test-key-12345","model":"gpt-realtime"}', encoding="utf-8")
+
+        # Test .env containing API key and deprecated model
+        env_file = self.root_path / ".env"
+        env_file.write_text('OPENAI_API_KEY=sk-proj-myrealapikey98765\nOPENAI_MODEL=gpt-realtime', encoding="utf-8")
+
+        findings = audit_directory(self.root_path, self.deprecations_path)
+        
+        json_finding = [f for f in findings if f["file"] == "secret.json"][0]
+        env_finding = [f for f in findings if f["file"] == ".env"][0]
+
+        # Verify secrets are masked and not exposed in matched_text
+        self.assertNotIn("sk-secret-test-key-12345", json_finding["matched_text"])
+        self.assertNotIn("sk-proj-myrealapikey98765", env_finding["matched_text"])
+        self.assertIn("***REDACTED***", json_finding["matched_text"])
+
 if __name__ == "__main__":
     unittest.main()
 
