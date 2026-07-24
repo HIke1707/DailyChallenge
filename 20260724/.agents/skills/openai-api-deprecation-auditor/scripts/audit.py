@@ -1,0 +1,146 @@
+import os
+import re
+import json
+import argparse
+from pathlib import Path
+
+# Supported target extensions / file patterns
+TARGET_EXTENSIONS = {'.cs', '.ts', '.js', '.json', '.yml', '.yaml', '.env', '.example', '.md'}
+
+# Default reference path relative to this script
+DEFAULT_DEPRECATIONS_PATH = Path(__file__).resolve().parent.parent / "references" / "openai-deprecations.json"
+
+def is_target_file(file_path: Path) -> bool:
+    """Check if the file matches target extensions or naming patterns."""
+    name = file_path.name.lower()
+    ext = file_path.suffix.lower()
+    if ext in TARGET_EXTENSIONS:
+        return True
+    if '.env' in name or name.endswith('.example'):
+        return True
+    return False
+
+def load_deprecations(deprecations_path: Path) -> list:
+    """Load deprecated models list from JSON reference file."""
+    if not deprecations_path.exists():
+        raise FileNotFoundError(f"Deprecations file not found: {deprecations_path}")
+    with open(deprecations_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def build_model_regex(model_id: str) -> re.Pattern:
+    """
+    Build a regex pattern to match model_id with strict boundaries.
+    Prevents false positives (e.g. matching 'gpt-4o' inside 'gpt-4o.5-2025-04-09').
+    """
+    pattern = r'(?<![a-zA-Z0-9_.-])' + re.escape(model_id) + r'(?![a-zA-Z0-9_.-])'
+    return re.compile(pattern)
+
+def audit_directory(root_dir: Path, deprecations_path: Path = DEFAULT_DEPRECATIONS_PATH, ignore_dirs=None) -> list:
+    """
+    Scan target directory for deprecated OpenAI model IDs in filenames and file contents.
+    """
+    if ignore_dirs is None:
+        ignore_dirs = {'.git', 'node_modules', '__pycache__', '.venv', 'venv'}
+
+    root_dir = Path(root_dir).resolve()
+    deprecations_path = Path(deprecations_path).resolve()
+    deprecations = load_deprecations(deprecations_path)
+
+    model_patterns = []
+    for item in deprecations:
+        model_id = item['model']
+        pattern = build_model_regex(model_id)
+        model_patterns.append({
+            'model_id': model_id,
+            'pattern': pattern,
+            'info': item
+        })
+
+    findings = []
+
+    for path in root_dir.rglob('*'):
+        if not path.is_file():
+            continue
+
+        resolved_path = path.resolve()
+
+        # Skip the deprecations reference file itself
+        if resolved_path == deprecations_path:
+            continue
+
+        # Skip ignored directories
+        if any(part in ignore_dirs for part in path.parts):
+            continue
+
+        if not is_target_file(path):
+            continue
+
+        try:
+            rel_path = str(path.relative_to(root_dir))
+        except ValueError:
+            rel_path = str(path)
+
+        # 1. Scan filename (stem) to avoid trailing extension dot blocking lookahead
+        for mp in model_patterns:
+            if mp['pattern'].search(path.stem):
+                findings.append({
+                    'file': rel_path,
+                    'line': 0,
+                    'type': 'filename',
+                    'matched_text': path.name,
+                    'model': mp['model_id'],
+                    'shutdown_date': mp['info'].get('shutdown_date'),
+                    'recommended_replacement': mp['info'].get('recommended_replacement')
+                })
+
+        # 2. Scan file content
+        try:
+            with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                for line_num, line in enumerate(f, 1):
+                    for mp in model_patterns:
+                        if mp['pattern'].search(line):
+                            findings.append({
+                                'file': rel_path,
+                                'line': line_num,
+                                'type': 'content',
+                                'matched_text': line.strip(),
+                                'model': mp['model_id'],
+                                'shutdown_date': mp['info'].get('shutdown_date'),
+                                'recommended_replacement': mp['info'].get('recommended_replacement')
+                            })
+        except Exception:
+            pass
+
+    return findings
+
+def main():
+    parser = argparse.ArgumentParser(description="Audit codebase for deprecated OpenAI models.")
+    parser.add_argument("target_dir", nargs="?", default=".", help="Directory to scan (default: current directory)")
+    parser.add_argument("--deprecations-path", default=str(DEFAULT_DEPRECATIONS_PATH), help="Path to openai-deprecations.json")
+    parser.add_argument("--json", action="store_true", help="Output results in JSON format")
+
+    args = parser.parse_args()
+
+    target_dir = Path(args.target_dir)
+    deprecations_path = Path(args.deprecations_path)
+
+    findings = audit_directory(target_dir, deprecations_path)
+
+    if args.json:
+        print(json.dumps(findings, indent=2, ensure_ascii=False))
+    else:
+        if not findings:
+            print("✅ No deprecated OpenAI models found.")
+            return
+
+        print(f"⚠️  Found {len(findings)} occurrence(s) of deprecated OpenAI models:\n")
+        for f in findings:
+            location = f"{f['file']}:{f['line']}" if f['line'] > 0 else f"{f['file']} (filename)"
+            print(f"- Location: {location}")
+            print(f"  Model: {f['model']} (Shutdown: {f['shutdown_date']}) -> Replace with: {f['recommended_replacement']}")
+            if f['line'] > 0:
+                print(f"  Snippet: {f['matched_text']}")
+            print()
+
+if __name__ == "__main__":
+    main()

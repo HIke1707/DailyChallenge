@@ -1,0 +1,47 @@
+[
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-realtime",
+        "recommended_replacement": "gpt-realtime-2.1"
+    },
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-audio",
+        "recommended_replacement": "gpt-audio-1.5"
+    },
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-4o-audio",
+        "recommended_replacement": "gpt-audio-1.5"
+    },
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-4o-realtime",
+        "recommended_replacement": "gpt-realtime-2.1"
+    },
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-realtime-mini",
+        "recommended_replacement": "gpt-realtime-2.1-mini"
+    },
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-audio-mini",
+        "recommended_replacement": "gpt-audio-1.5"
+    },
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-4o-mini-realtime",
+        "recommended_replacement": "gpt-realtime-2.1-mini"
+    },
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-4o-mini-audio",
+        "recommended_replacement": "gpt-audio-1.5"
+    },
+    {
+        "shutdown_date": "2027-01-20",
+        "model": "gpt-4o-mini-transcribe-2025-03-20",
+        "recommended_replacement": "gpt-4o-mini-transcribe-2025-12-15"
+    }
+]

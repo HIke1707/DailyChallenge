@@ -1,0 +1,6 @@
+id,should_trigger,prompt
+test-01,true,"Use the $openai-api-deprecation-auditor skill to audit this repository."
+test-02,true,"Check whether this project uses OpenAI models that will stop working."
+test-03,true,"Review our audio and realtime model migration readiness."
+test-04,false,"Review this repository's SQL performance."
+test-05,false,"Refactor the Vue components into composables."
