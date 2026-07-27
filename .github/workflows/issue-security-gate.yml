@@ -25,7 +25,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install the security gate
-        run: python -m pip install --no-build-isolation -e 20260727/agent-issue-security-gate
+        run: python -m pip install -e 20260727/agent-issue-security-gate
 
       - name: Build an intake document from the GitHub event
         uses: actions/github-script@v7
