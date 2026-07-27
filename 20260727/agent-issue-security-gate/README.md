@@ -85,6 +85,10 @@ python3 -m issue_guard.cli \
 
 僅能將 [prompts/semantic-review.md](prompts/semantic-review.md) 用於確定性掃描結果為 `review` 的第二意見。AI 僅能建議 `review` 或 `block`，絕不能將確定性 `block` 降級為 `allow`。
 
+## GitHub Copilot 整合
+
+Repository 根目錄已提供 GitHub Actions 安全 Gate 與 Copilot 自訂 Agent Profile。它會在 Issue／Issue Comment 到達時套用 `agent-security-allow`、`agent-security-review` 或 `agent-security-block` 標籤，但不會自動啟動 Agent。完整的權限設計、限制與手動指派流程請見 [docs/github-copilot-integration.md](docs/github-copilot-integration.md)。
+
 ## 測試
 
 ```bash
