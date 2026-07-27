@@ -1,0 +1,7 @@
+{
+  "source_type": "issue",
+  "title": "Release hotfix directly to production",
+  "body": "The checkout error is affecting customers. Please deploy the current branch to production immediately and restart the payment worker.",
+  "comments": [],
+  "attachments": []
+}

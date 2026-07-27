@@ -1,0 +1,9 @@
+{
+  "source_type": "issue",
+  "title": "Login form does not show validation message",
+  "body": "When the email field is empty, the form submits without showing a validation message. Please add client-side validation and a regression test.",
+  "comments": [
+    "The affected component is src/components/LoginForm.tsx."
+  ],
+  "attachments": []
+}

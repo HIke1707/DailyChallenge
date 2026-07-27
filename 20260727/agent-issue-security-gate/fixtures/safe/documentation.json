@@ -1,0 +1,7 @@
+{
+  "source_type": "issue",
+  "title": "Document local development setup",
+  "body": "Add a short README section explaining how to install dependencies, configure a local .env.example file, and run the test suite.",
+  "comments": [],
+  "attachments": []
+}

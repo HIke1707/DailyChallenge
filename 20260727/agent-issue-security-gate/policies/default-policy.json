@@ -1,0 +1,138 @@
+{
+  "version": "1.0",
+  "name": "default-agent-issue-intake-policy",
+  "description": "Deterministic rules for screening untrusted issue, comment, and attachment text before it reaches a coding agent.",
+  "score_thresholds": {
+    "review": 1,
+    "block": 60
+  },
+  "rules": [
+    {
+      "id": "SEC-001",
+      "category": "secret_exfiltration",
+      "category_label_zh": "秘密外洩",
+      "action": "block",
+      "score": 92,
+      "summary": "Requests collecting credentials or environment data and sending it outside the repository.",
+      "requested_capabilities": [
+        "read_secrets",
+        "external_network"
+      ],
+      "patterns": [
+        "(?is)\\b(print|show|output|dump|read)\\b.{0,160}\\b(environment variables?|env|api[ _-]?keys?|credentials?|secrets?)\\b.{0,240}\\b(send|upload|post|exfiltrate|collect)\\b",
+        "(?is)\\b(send|upload|post|exfiltrate)\\b.{0,160}\\b(api[ _-]?keys?|credentials?|secrets?|environment variables?|env)\\b.{0,240}https?://"
+      ]
+    },
+    {
+      "id": "SEC-002",
+      "category": "destructive_operation",
+      "category_label_zh": "破壞性操作",
+      "action": "block",
+      "score": 90,
+      "summary": "Requests a destructive filesystem command targeting the root filesystem.",
+      "requested_capabilities": [
+        "shell_execution",
+        "destructive_filesystem"
+      ],
+      "patterns": [
+        "(?i)\\brm\\s+-rf\\s+/(?:\\s|$)",
+        "(?i)\\brm\\s+-fr\\s+/(?:\\s|$)",
+        "(?i)\\b(format|wipe|erase)\\b.{0,80}\\b(disk|filesystem|root)\\b"
+      ]
+    },
+    {
+      "id": "SEC-003",
+      "category": "instruction_override",
+      "category_label_zh": "指令覆寫",
+      "action": "block",
+      "score": 75,
+      "summary": "Attempts to replace the agent's governing instructions or safety rules.",
+      "requested_capabilities": [
+        "instruction_override"
+      ],
+      "patterns": [
+        "(?is)\\b(ignore|disregard|override)\\b.{0,100}\\b(prior|previous|all)\\b.{0,100}\\b(instructions?|rules?|constraints?)\\b",
+        "(?i)\\b(system prompt|developer message|hidden instructions?)\\b"
+      ]
+    },
+    {
+      "id": "SEC-004",
+      "category": "encoded_command",
+      "category_label_zh": "編碼或混淆指令",
+      "action": "review",
+      "score": 35,
+      "summary": "Requests decoding or executing an encoded command.",
+      "requested_capabilities": [
+        "shell_execution"
+      ],
+      "patterns": [
+        "(?is)\\b(decode|base64|decode64)\\b.{0,120}\\b(run|execute|shell|command)\\b",
+        "(?i)\\b(base64|encoded)\\b.{0,80}\\b(helper|script|command)\\b"
+      ]
+    },
+    {
+      "id": "SEC-005",
+      "category": "privilege_escalation",
+      "category_label_zh": "權限提升",
+      "action": "block",
+      "score": 80,
+      "summary": "Requests bypassing security controls or granting elevated privileges without approval.",
+      "requested_capabilities": [
+        "modify_access_control",
+        "modify_audit_controls"
+      ],
+      "patterns": [
+        "(?is)\\b(bypass|disable)\\b.{0,160}\\b(repository protections?|audit logging|approval|access controls?)\\b",
+        "(?is)\\bgrant\\b.{0,120}\\b(administrator|admin|owner)\\b.{0,120}\\b(access|permission|role)\\b"
+      ]
+    },
+    {
+      "id": "SEC-006",
+      "category": "external_download",
+      "category_label_zh": "外部資源下載",
+      "action": "review",
+      "score": 25,
+      "summary": "Requests downloading or running an external resource.",
+      "requested_capabilities": [
+        "external_network",
+        "shell_execution"
+      ],
+      "patterns": [
+        "(?is)\\b(download|curl|wget|fetch)\\b.{0,200}https?://",
+        "(?is)https?://\\S+.{0,160}\\b(run|execute|install)\\b"
+      ]
+    },
+    {
+      "id": "SEC-007",
+      "category": "production_operation",
+      "category_label_zh": "正式環境操作",
+      "action": "review",
+      "score": 45,
+      "summary": "Requests a direct change to a production environment and therefore requires explicit human approval.",
+      "requested_capabilities": [
+        "production_deployment",
+        "infrastructure_mutation"
+      ],
+      "patterns": [
+        "(?is)\\b(deploy|release|promote|apply|migrate|restart|scale|delete)\\b.{0,120}\\b(production|prod)\\b",
+        "(?is)\\b(production|prod)\\b.{0,120}\\b(deploy|release|promote|apply|migrate|restart|scale|delete)\\b"
+      ]
+    },
+    {
+      "id": "SEC-008",
+      "category": "security_control_disablement",
+      "category_label_zh": "關閉測試或防護",
+      "action": "review",
+      "score": 45,
+      "summary": "Requests disabling, bypassing, or removing tests and protective controls.",
+      "requested_capabilities": [
+        "modify_test_controls",
+        "modify_security_controls"
+      ],
+      "patterns": [
+        "(?is)\\b(disable|skip|turn off|bypass)\\b.{0,160}\\b(tests?|test suite|ci checks?|security checks?|validations?|guardrails?)\\b",
+        "(?is)\\b(remove|delete|comment out)\\b.{0,120}\\b(tests?|assertions?|validations?|guardrails?)\\b"
+      ]
+    }
+  ]
+}

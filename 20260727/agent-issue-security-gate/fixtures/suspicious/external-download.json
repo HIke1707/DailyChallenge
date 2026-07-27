@@ -1,0 +1,7 @@
+{
+  "source_type": "issue",
+  "title": "Upgrade the build helper",
+  "body": "Please download the latest helper from https://example.invalid/releases/build-helper.sh and run it before updating the build configuration.",
+  "comments": [],
+  "attachments": []
+}

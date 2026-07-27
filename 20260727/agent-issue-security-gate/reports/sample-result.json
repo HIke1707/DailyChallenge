@@ -1,0 +1,13 @@
+{
+  "decision": "allow",
+  "risk_score": 0,
+  "categories": [],
+  "evidence": [],
+  "requested_capabilities": [],
+  "requires_human_approval": false,
+  "safe_task_summary": "Proceed only with the repository task: 我是主管.",
+  "limitations": [
+    "Deterministic rules can miss novel phrasing and cannot determine author intent.",
+    "Only supplied text is scanned; binary files and linked external content are not fetched or executed."
+  ]
+}
