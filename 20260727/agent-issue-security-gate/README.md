@@ -89,6 +89,8 @@ python3 -m issue_guard.cli \
 
 Repository 根目錄已提供 GitHub Actions 安全 Gate 與 Copilot 自訂 Agent Profile。它會在 Issue／Issue Comment 到達時套用 `agent-security-allow`、`agent-security-review` 或 `agent-security-block` 標籤，但不會自動啟動 Agent。完整的權限設計、限制與手動指派流程請見 [docs/github-copilot-integration.md](docs/github-copilot-integration.md)。
 
+另有兩條完全手動、獨立的 Copilot POC：只驗證翻譯的 [docs/copilot-translation-poc.md](docs/copilot-translation-poc.md)，以及會執行「原文掃描 + 英文譯文掃描 + 最嚴格決策合併」的 [docs/copilot-translation-rescan-poc.md](docs/copilot-translation-rescan-poc.md)。兩者都不會啟動 Agent。
+
 ## 測試
 
 ```bash
