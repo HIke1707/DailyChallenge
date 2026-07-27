@@ -18,13 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build a bounded translation prompt from the Issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           PROMPT_PATH: ${{ runner.temp }}/copilot-translation-prompt.txt
         with:
           script: |
             const fs = require('fs');
-            const issueNumber = Number(core.getInput('issue_number'));
+            const issueNumber = Number(context.payload.inputs?.issue_number);
             if (!Number.isInteger(issueNumber) || issueNumber <= 0) {
               throw new Error('issue_number must be a positive integer');
             }
