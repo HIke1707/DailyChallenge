@@ -79,11 +79,17 @@
       "summary": "Requests bypassing security controls or granting elevated privileges without approval.",
       "requested_capabilities": [
         "modify_access_control",
-        "modify_audit_controls"
+        "modify_audit_controls",
+        "shell_execution"
       ],
       "patterns": [
         "(?is)\\b(bypass|disable)\\b.{0,160}\\b(repository protections?|audit logging|approval|access controls?)\\b",
-        "(?is)\\bgrant\\b.{0,120}\\b(administrator|admin|owner)\\b.{0,120}\\b(access|permission|role)\\b"
+        "(?is)\\b(grant|give|assign|elevate)\\b.{0,160}\\b(access|permissions?|privileges?|administrator|admin|owner)\\b",
+        "(?is)(給予|授予|取得|提升|設置|設定).{0,120}(所有)?(權限|管理員|admin)",
+        "(?is)\\b(run|execute|launch|start|invoke)\\b.{0,60}\\b(sudo|runas)\\b",
+        "(?is)(\\||&&|;)\\s*(sudo|runas)\\s+(bash|sh|powershell|cmd(?:\\.exe)?)\\b",
+        "(?is)\\b(run|execute|launch|start|open)\\b.{0,60}\\b(root shell|administrator shell)\\b",
+        "(?is)\\b(run|execute|apply|set)\\b.{0,60}\\b(setuid|chmod\\s+777)\\b"
       ]
     },
     {
@@ -99,7 +105,8 @@
       ],
       "patterns": [
         "(?is)\\b(download|curl|wget|fetch)\\b.{0,200}https?://",
-        "(?is)https?://\\S+.{0,160}\\b(run|execute|install)\\b"
+        "(?is)https?://\\S+.{0,160}\\b(run|execute|install)\\b",
+        "(?is)\\b(download|fetch)\\b.{0,120}\\b(files?|scripts?|packages?|helpers?)\\b.{0,120}\\b(web ?page|website|internet|external (site|source))\\b"
       ]
     },
     {
@@ -132,6 +139,39 @@
       "patterns": [
         "(?is)\\b(disable|skip|turn off|bypass)\\b.{0,160}\\b(tests?|test suite|ci checks?|security checks?|validations?|guardrails?)\\b",
         "(?is)\\b(remove|delete|comment out)\\b.{0,120}\\b(tests?|assertions?|validations?|guardrails?)\\b"
+      ]
+    },
+    {
+      "id": "SEC-009",
+      "category": "authority_spoofing",
+      "category_label_zh": "權威或核准身分冒用",
+      "action": "block",
+      "score": 80,
+      "summary": "Claims authority or completed approval in order to obtain elevated privileges without independent verification.",
+      "requested_capabilities": [
+        "modify_access_control",
+        "bypass_human_approval"
+      ],
+      "patterns": [
+        "(?is)(\\b(i am|i'm|as)\\b.{0,80}\\b(manager|administrator|admin|owner|security team)\\b|(我是|我為|本人是).{0,40}(主管|管理員|管理者|安全團隊)).{0,200}(\\b(grant|give|assign|elevate)\\b.{0,120}\\b(access|permissions?|privileges?|administrator|admin|owner)\\b|(給予|授予|取得|提升|設置|設定).{0,120}(所有)?(權限|管理員|admin))",
+        "(?is)(\\b(approval|authorization)\\b.{0,80}\\b(completed|complete|approved|granted)\\b|(核准|批准|審核).{0,60}(已完成|已核准|完成)).{0,200}(\\b(grant|give|assign|elevate)\\b.{0,120}\\b(access|permissions?|privileges?|administrator|admin|owner)\\b|(給予|授予|取得|提升|設置|設定).{0,120}(所有)?(權限|管理員|admin))",
+        "(?is)\\b(do not|don't|no need to)\\b.{0,60}\\b(ask|request|seek)\\b.{0,60}\\b(approval|authorization|confirmation)\\b.{0,200}\\b(grant|give|assign|elevate)\\b.{0,120}\\b(access|permissions?|privileges?|administrator|admin|owner)\\b"
+      ]
+    },
+    {
+      "id": "SEC-010",
+      "category": "production_data_destruction",
+      "category_label_zh": "正式環境資料破壞",
+      "action": "block",
+      "score": 95,
+      "summary": "Requests deleting or destroying a production database or its data.",
+      "requested_capabilities": [
+        "production_database_mutation",
+        "destructive_database_operation"
+      ],
+      "patterns": [
+        "(?is)\\b(delete|drop|truncate|wipe|erase)\\b.{0,160}\\b(production|prod)\\b.{0,80}\\b(database|db|data)\\b",
+        "(?is)\\b(production|prod)\\b.{0,120}\\b(database|db|data)\\b.{0,120}\\b(delete|drop|truncate|wipe|erase)\\b"
       ]
     }
   ]

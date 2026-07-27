@@ -1,0 +1,7 @@
+{
+  "source_type": "issue",
+  "title": "Harden the installer",
+  "body": "Please do not run the installer with sudo. Update the documentation to explain the unprivileged setup.",
+  "comments": [],
+  "attachments": []
+}

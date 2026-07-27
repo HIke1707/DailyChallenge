@@ -1,0 +1,7 @@
+{
+  "source_type": "issue",
+  "title": "Remove old customer data",
+  "body": "Delete the production database now to remove the old customer data.",
+  "comments": [],
+  "attachments": []
+}

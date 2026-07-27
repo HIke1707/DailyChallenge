@@ -37,7 +37,7 @@ python3 -m issue_guard.cli \
 
 此指令會產生 `reports/sample-result.json` 與 `reports/sample-result.md`。
 
-若結果是 `block`，CLI 會在寫入報告後回傳 exit code `2`。這是刻意設計：CI 或 Agent 包裝工作流應在將任務交給 Coding Agent 前停止。
+CLI 的 Exit Code 契約為：`0=allow`、`2=review`、`3=block`、`4=輸入、Policy 或參數錯誤`。任何非 `allow` 結果都必須在將任務交給 Coding Agent 前停止。
 
 若需要不同的報告檔名，可使用 `--report-name`：
 
@@ -63,7 +63,7 @@ python3 -m issue_guard.cli \
 }
 ```
 
-`title`、`body`、每一則 `comment` 與每一個附件的 `text` 都會分開正規化。證據報告會保留內容來源與從 1 開始計算的行號。
+`title`、`body`、每一則 `comment` 與每一個附件的 `text` 都會分開正規化。受限的單層 Base64 偵測僅處理格式與長度合理、且解碼後大部分為可列印文字的候選內容；它不會執行解碼結果。證據報告會保留內容來源、從 1 開始計算的行號與轉換中繼資料，但不會回顯解碼 Payload。
 
 ## 政策設計
 
@@ -83,7 +83,7 @@ python3 -m issue_guard.cli \
 
 ## 可選的 AI 語意複核
 
-僅能將 [prompts/semantic-review.md](prompts/semantic-review.md) 用於確定性掃描結果為 `review` 的第二意見。AI 僅能建議 `review` 或 `block`，絕不能將確定性 `block` 降級為 `allow`。
+僅能將 [prompts/semantic-review.md](prompts/semantic-review.md) 用於確定性掃描結果為 `review` 的第二意見。`issue_guard.decision_merge.merge_decisions()` 會以最嚴格結果合併確定性與 AI 結論，因此 AI 即使嘗試回傳 `allow`，也絕不能將確定性 `block` 或 `review` 降級。
 
 ## GitHub Copilot 整合
 

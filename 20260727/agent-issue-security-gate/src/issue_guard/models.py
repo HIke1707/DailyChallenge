@@ -17,6 +17,8 @@ class TextSegment:
     source: SourceType
     text: str
     source_name: str | None = None
+    transformation: str | None = None
+    decoded_content_redacted: bool = False
 
 
 @dataclass(frozen=True)
@@ -38,6 +40,8 @@ class Evidence:
     category_label_zh: str
     summary: str
     source_name: str | None = None
+    transformation: str | None = None
+    decoded_content_redacted: bool = False
 
 
 @dataclass(frozen=True)
@@ -49,6 +53,8 @@ class ScanResult:
     categories: tuple[str, ...]
     evidence: tuple[Evidence, ...]
     requested_capabilities: tuple[str, ...]
+    forbidden_capabilities: tuple[str, ...]
+    allowed_capabilities: tuple[str, ...]
     requires_human_approval: bool
 
 

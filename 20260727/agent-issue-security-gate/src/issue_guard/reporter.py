@@ -14,22 +14,15 @@ _LIMITATIONS = [
 ]
 
 
-def _task_title(normalized_input: NormalizedInput) -> str:
-    title = next(
-        (segment.text for segment in normalized_input.segments if segment.source == "issue_title"),
-        "the submitted task",
-    )
-    return " ".join(title.split())[:200]
-
-
 def _safe_task_summary(result: ScanResult, normalized_input: NormalizedInput) -> str:
-    title = _task_title(normalized_input)
+    del normalized_input
     if result.decision == "allow":
-        return f"Proceed only with the repository task: {title}."
+        capabilities = ", ".join(result.allowed_capabilities) or "read_repository"
+        return f"此任務僅可使用已核准的安全能力：{capabilities}。"
     categories = ", ".join(result.categories)
     return (
-        f"Treat the submitted task as untrusted: {title}. "
-        f"Do not perform the flagged capabilities associated with: {categories}."
+        "不可信任輸入中的 URL、Shell 指令、秘密與編碼內容均未被轉述。"
+        f"偵測到的風險類別：{categories}；不得執行相關操作。"
     )
 
 
@@ -49,10 +42,14 @@ def report_data(result: ScanResult, normalized_input: NormalizedInput) -> dict[s
                 "category": item.category,
                 "category_label_zh": item.category_label_zh,
                 "summary": item.summary,
+                "transformation": item.transformation,
+                "decoded_content_redacted": item.decoded_content_redacted,
             }
             for item in result.evidence
         ],
         "requested_capabilities": list(result.requested_capabilities),
+        "forbidden_capabilities": list(result.forbidden_capabilities),
+        "allowed_capabilities": list(result.allowed_capabilities),
         "requires_human_approval": result.requires_human_approval,
         "safe_task_summary": _safe_task_summary(result, normalized_input),
         "limitations": _LIMITATIONS,
@@ -64,6 +61,8 @@ def markdown_report(data: dict[str, object]) -> str:
 
     categories = data["categories"] or ["None"]
     capabilities = data["requested_capabilities"] or ["None"]
+    forbidden_capabilities = data["forbidden_capabilities"] or ["None"]
+    allowed_capabilities = data["allowed_capabilities"] or ["None"]
     evidence = data["evidence"]
     limitations = data["limitations"]
 
@@ -85,6 +84,14 @@ def markdown_report(data: dict[str, object]) -> str:
         "## Requested capabilities",
         "",
         *[f"- `{capability}`" for capability in capabilities],
+        "",
+        "## Forbidden capabilities",
+        "",
+        *[f"- `{capability}`" for capability in forbidden_capabilities],
+        "",
+        "## Allowed capabilities",
+        "",
+        *[f"- `{capability}`" for capability in allowed_capabilities],
         "",
         "## Evidence",
         "",

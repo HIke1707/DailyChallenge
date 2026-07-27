@@ -11,8 +11,16 @@ from .reporter import write_reports
 from .scanner import scan
 
 
+EXIT_CODES = {"allow": 0, "review": 2, "block": 3, "error": 4}
+
+
+class _CliArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        raise ValueError(message)
+
+
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _CliArgumentParser(
         description="Screen untrusted issue, comment, and attachment text before agent intake."
     )
     parser.add_argument("--input", required=True, type=Path, help="Path to an intake JSON document")
@@ -28,8 +36,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
     try:
+        args = parser.parse_args(argv)
         normalized_input = load_and_normalize(args.input)
         policy = load_policy(args.policy)
         result = scan(normalized_input, policy)
@@ -37,12 +45,16 @@ def main(argv: list[str] | None = None) -> int:
             args.output, result, normalized_input, args.report_name
         )
     except (InputValidationError, PolicyValidationError) as error:
-        parser.error(str(error))
+        print(f"error: {error}")
+        return EXIT_CODES["error"]
+    except ValueError as error:
+        print(f"error: {error}")
+        return EXIT_CODES["error"]
 
     print(f"decision={result.decision} risk_score={result.risk_score}")
     print(f"json_report={json_path}")
     print(f"markdown_report={markdown_path}")
-    return 2 if result.decision == "block" else 0
+    return EXIT_CODES[result.decision]
 
 
 if __name__ == "__main__":
