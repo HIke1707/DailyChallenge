@@ -9,7 +9,7 @@ from .policy import Policy
 
 
 _NEGATED_ACTION = re.compile(
-    r"(?:\bdo not\b|\bdon't\b|\bnever\b|\bavoid\b|不要|禁止|勿|不可)[^.。！？!\n]{0,60}$",
+    r"(?:\bdo not\b|\bdon't\b|\bnever\b|\bavoid\b|\bcannot\b|\bcan't\b|\bmust not\b|\bshould not\b|不要|禁止|勿|不可|無法|不允許)[^.。！？!\n]{0,60}$",
     re.IGNORECASE,
 )
 _WRITE_TASK = re.compile(r"\b(fix|implement|update|change|add|remove|refactor|correct)\b|修正|修復|實作|更新|修改|新增|移除|重構")

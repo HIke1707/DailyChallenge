@@ -1,0 +1,52 @@
+{
+  "decision": "block",
+  "risk_score": 100,
+  "categories": [
+    "privilege_escalation",
+    "external_download"
+  ],
+  "evidence": [
+    {
+      "source": "attachment",
+      "source_name": "maintenance.txt",
+      "line": 1,
+      "rule_id": "SEC-005",
+      "category": "privilege_escalation",
+      "category_label_zh": "權限提升",
+      "summary": "Requests bypassing security controls or granting elevated privileges without approval.",
+      "transformation": "base64_decode",
+      "decoded_content_redacted": true
+    },
+    {
+      "source": "attachment",
+      "source_name": "maintenance.txt",
+      "line": 1,
+      "rule_id": "SEC-006",
+      "category": "external_download",
+      "category_label_zh": "外部資源下載",
+      "summary": "Requests downloading or running an external resource.",
+      "transformation": "base64_decode",
+      "decoded_content_redacted": true
+    }
+  ],
+  "requested_capabilities": [
+    "read_repository",
+    "modify_access_control",
+    "modify_audit_controls",
+    "shell_execution",
+    "external_network"
+  ],
+  "forbidden_capabilities": [
+    "modify_access_control",
+    "modify_audit_controls",
+    "shell_execution",
+    "external_network"
+  ],
+  "allowed_capabilities": [],
+  "requires_human_approval": true,
+  "safe_task_summary": "不可信任輸入中的 URL、Shell 指令、秘密與編碼內容均未被轉述。偵測到的風險類別：privilege_escalation, external_download；不得執行相關操作。",
+  "limitations": [
+    "Deterministic rules can miss novel phrasing and cannot determine author intent.",
+    "Only supplied text is scanned; binary files and linked external content are not fetched or executed."
+  ]
+}

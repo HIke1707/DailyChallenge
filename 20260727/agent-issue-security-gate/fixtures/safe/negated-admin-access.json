@@ -1,0 +1,7 @@
+{
+  "source_type": "issue",
+  "title": "Access-control regression test",
+  "body": "Ensure users cannot grant admin access. 請修正無法設定管理員權限的 bug。",
+  "comments": [],
+  "attachments": []
+}

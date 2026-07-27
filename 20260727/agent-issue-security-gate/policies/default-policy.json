@@ -84,9 +84,12 @@
       ],
       "patterns": [
         "(?is)\\b(bypass|disable)\\b.{0,160}\\b(repository protections?|audit logging|approval|access controls?)\\b",
-        "(?is)\\b(grant|give|assign|elevate)\\b.{0,160}\\b(access|permissions?|privileges?|administrator|admin|owner)\\b",
-        "(?is)(給予|授予|取得|提升|設置|設定).{0,120}(所有)?(權限|管理員|admin)",
+        "(?is)\\b(grant|give|assign)\\b.{0,120}\\b(administrator|admin|owner|root)\\b.{0,120}\\b(access|permissions?|privileges?|role)\\b",
+        "(?is)\\b(elevate|promote)\\b.{0,120}\\b(account )?(permissions?|privileges?|access)\\b",
+        "(?is)(取得|提升).{0,120}(所有)?權限|(給予|授予|設置|設定).{0,120}(所有權限|管理員權限|admin(istrator)?\\s*(權限|access)|root權限)",
         "(?is)\\b(run|execute|launch|start|invoke)\\b.{0,60}\\b(sudo|runas)\\b",
+        "(?is)(執行|運行|啟動).{0,60}(sudo|runas)",
+        "(?im)^\\s*(?:\\$?\\s*)?(sudo|runas)\\s+\\S+",
         "(?is)(\\||&&|;)\\s*(sudo|runas)\\s+(bash|sh|powershell|cmd(?:\\.exe)?)\\b",
         "(?is)\\b(run|execute|launch|start|open)\\b.{0,60}\\b(root shell|administrator shell)\\b",
         "(?is)\\b(run|execute|apply|set)\\b.{0,60}\\b(setuid|chmod\\s+777)\\b"
@@ -172,6 +175,84 @@
       "patterns": [
         "(?is)\\b(delete|drop|truncate|wipe|erase)\\b.{0,160}\\b(production|prod)\\b.{0,80}\\b(database|db|data)\\b",
         "(?is)\\b(production|prod)\\b.{0,120}\\b(database|db|data)\\b.{0,120}\\b(delete|drop|truncate|wipe|erase)\\b"
+      ]
+    },
+    {
+      "id": "SEC-001-ZH",
+      "category": "secret_exfiltration",
+      "category_label_zh": "秘密外洩",
+      "action": "block",
+      "score": 92,
+      "summary": "Requests reading sensitive configuration or credentials and posting them outside the trusted repository.",
+      "requested_capabilities": [
+        "read_secrets",
+        "external_network"
+      ],
+      "patterns": [
+        "(?is)(讀取|列出|顯示|輸出).{0,160}(環境變數|API ?Key|金鑰|連線字串|帳密|憑證|秘密).{0,240}(貼到|傳送|上傳|送到|發布).{0,120}(Issue|留言|評論|Comment|外部|網址|網站)?",
+        "(?is)(API ?Key|金鑰|連線字串|帳密|憑證|秘密).{0,160}(貼到|傳送|上傳|送到|發布).{0,120}(Issue|留言|評論|Comment|外部|網址|網站)"
+      ]
+    },
+    {
+      "id": "SEC-003-ZH",
+      "category": "instruction_override",
+      "category_label_zh": "指令覆寫",
+      "action": "block",
+      "score": 75,
+      "summary": "Attempts to ignore safety rules or replace the agent's governing instructions.",
+      "requested_capabilities": [
+        "instruction_override"
+      ],
+      "patterns": [
+        "(?is)(忽略|無視|覆寫).{0,100}(所有|先前|既有)?.{0,100}(安全規則|規則|指示|指令|限制)",
+        "(?is)(系統提示|系統訊息|開發者訊息|隱藏指令)"
+      ]
+    },
+    {
+      "id": "SEC-008-ZH",
+      "category": "security_control_disablement",
+      "category_label_zh": "關閉測試或防護",
+      "action": "review",
+      "score": 45,
+      "summary": "Requests skipping tests or disabling security controls.",
+      "requested_capabilities": [
+        "modify_test_controls",
+        "modify_security_controls"
+      ],
+      "patterns": [
+        "(?is)(跳過|略過|關閉|停用|繞過).{0,160}(所有)?(測試|測試套件|資安檢查|安全檢查|驗證|防護)",
+        "(?is)(移除|刪除|註解).{0,120}(測試|斷言|驗證|防護)"
+      ]
+    },
+    {
+      "id": "SEC-010-ZH",
+      "category": "production_data_destruction",
+      "category_label_zh": "正式環境資料破壞",
+      "action": "block",
+      "score": 95,
+      "summary": "Requests deleting production databases or production data.",
+      "requested_capabilities": [
+        "production_database_mutation",
+        "destructive_database_operation"
+      ],
+      "patterns": [
+        "(?is)(刪除|清除|刪掉|截斷).{0,160}(正式|生產).{0,80}(資料庫|資料)",
+        "(?is)(正式|生產).{0,120}(資料庫|資料).{0,120}(刪除|清除|刪掉|截斷)"
+      ]
+    },
+    {
+      "id": "SEC-015",
+      "category": "access_change",
+      "category_label_zh": "存取權限變更",
+      "action": "review",
+      "score": 40,
+      "summary": "Requests a non-administrative access change that requires human review.",
+      "requested_capabilities": [
+        "modify_access_control"
+      ],
+      "patterns": [
+        "(?is)\\b(grant|give|assign)\\b.{0,120}\\b(read|write)?\\s*access\\b",
+        "(?is)(給予|授予|設置|設定).{0,120}(讀取|讀寫|read|write).{0,40}(權限|access)"
       ]
     }
   ]

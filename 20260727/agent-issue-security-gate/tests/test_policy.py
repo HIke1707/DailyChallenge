@@ -16,9 +16,24 @@ class DefaultPolicyTests(unittest.TestCase):
     def test_default_policy_has_unique_machine_readable_categories(self) -> None:
         policy = load_policy(PROJECT_ROOT / "policies" / "default-policy.json")
 
-        self.assertEqual(len(policy.rules), 10)
-        self.assertEqual(len({rule.id for rule in policy.rules}), 10)
-        self.assertEqual(len({rule.category for rule in policy.rules}), 10)
+        self.assertEqual(len(policy.rules), 15)
+        self.assertEqual(len({rule.id for rule in policy.rules}), 15)
+        self.assertEqual(
+            {rule.category for rule in policy.rules},
+            {
+                "access_change",
+                "authority_spoofing",
+                "destructive_operation",
+                "encoded_command",
+                "external_download",
+                "instruction_override",
+                "privilege_escalation",
+                "production_data_destruction",
+                "production_operation",
+                "secret_exfiltration",
+                "security_control_disablement",
+            },
+        )
         self.assertTrue(all(rule.category_label_zh for rule in policy.rules))
         self.assertEqual(policy.review_threshold, 1)
         self.assertEqual(policy.block_threshold, 60)

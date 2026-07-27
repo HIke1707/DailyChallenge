@@ -1,0 +1,7 @@
+{
+  "source_type": "issue",
+  "title": "Maintenance command",
+  "body": "\u0060\u0060\u0060bash\nsudo bash maintenance.sh\n\u0060\u0060\u0060",
+  "comments": [],
+  "attachments": []
+}

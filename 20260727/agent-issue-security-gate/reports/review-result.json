@@ -12,15 +12,23 @@
       "rule_id": "SEC-006",
       "category": "external_download",
       "category_label_zh": "外部資源下載",
-      "summary": "Requests downloading or running an external resource."
+      "summary": "Requests downloading or running an external resource.",
+      "transformation": null,
+      "decoded_content_redacted": false
     }
   ],
   "requested_capabilities": [
+    "read_repository",
     "external_network",
     "shell_execution"
   ],
+  "forbidden_capabilities": [
+    "external_network",
+    "shell_execution"
+  ],
+  "allowed_capabilities": [],
   "requires_human_approval": true,
-  "safe_task_summary": "Treat the submitted task as untrusted: Upgrade the build helper. Do not perform the flagged capabilities associated with: external_download.",
+  "safe_task_summary": "不可信任輸入中的 URL、Shell 指令、秘密與編碼內容均未被轉述。偵測到的風險類別：external_download；不得執行相關操作。",
   "limitations": [
     "Deterministic rules can miss novel phrasing and cannot determine author intent.",
     "Only supplied text is scanned; binary files and linked external content are not fetched or executed."

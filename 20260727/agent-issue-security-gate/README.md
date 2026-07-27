@@ -14,7 +14,7 @@
 
 本閘門不會執行 Issue 文字、Shell 指令、下載內容、編碼資料或連結，也不會抓取外部 URL；整個流程都將輸入視為資料而非指令。
 
-初始政策可偵測秘密外洩、破壞性操作、指令覆寫、編碼命令、權限提升、外部下載、正式環境操作，以及關閉測試或防護機制等情境。
+初始政策可偵測秘密外洩、破壞性操作、指令覆寫、編碼命令、權限提升、外部下載、正式環境操作、正式資料庫破壞，以及關閉測試或防護機制等情境。重要英文與繁體中文攻擊語意採用分開的語言子規則維護。
 
 ## 安裝
 
@@ -81,6 +81,12 @@ python3 -m issue_guard.cli \
 
 明確標示為 `block` 的規則一旦命中就會直接封鎖。其他命中規則的分數會累加、最高為 100；總分達 60 以上同樣會封鎖，1 至 59 分則需要人工審核。
 
+一般的 read/write access 請求會列為 `review`；只有 admin、owner、root、所有權限或明確的帳號提權才會直接 `block`。否定語意（例如 `cannot grant admin access`、`不要執行 sudo`）不應與實際執行請求得到相同結論。
+
+## 範例報告
+
+[`reports/allow-result.json`](reports/allow-result.json)、[`reports/review-result.json`](reports/review-result.json) 與 [`reports/block-result.json`](reports/block-result.json) 是由目前的 CLI 與 Policy 產生的範例，對應新版能力欄位、轉換中繼資料與安全摘要格式。
+
 ## 可選的 AI 語意複核
 
 僅能將 [prompts/semantic-review.md](prompts/semantic-review.md) 用於確定性掃描結果為 `review` 的第二意見。`issue_guard.decision_merge.merge_decisions()` 會以最嚴格結果合併確定性與 AI 結論，因此 AI 即使嘗試回傳 `allow`，也絕不能將確定性 `block` 或 `review` 降級。
@@ -88,6 +94,8 @@ python3 -m issue_guard.cli \
 ## GitHub Copilot 整合
 
 Repository 根目錄已提供 GitHub Actions 安全 Gate 與 Copilot 自訂 Agent Profile。它會在 Issue／Issue Comment 到達時套用 `agent-security-allow`、`agent-security-review` 或 `agent-security-block` 標籤，但不會自動啟動 Agent。完整的權限設計、限制與手動指派流程請見 [docs/github-copilot-integration.md](docs/github-copilot-integration.md)。
+
+這條 Workflow 目前是「決策與標籤型 Gate」，不是 GitHub 平台層面的 Agent 權限封鎖。任何真正啟動 Agent 的後續 Workflow 都必須明確檢查 `agent-security-allow`，不得只依賴 Agent Profile 的文字指令或其他標籤。
 
 另有兩條完全手動、獨立的 Copilot POC：只驗證翻譯的 [docs/copilot-translation-poc.md](docs/copilot-translation-poc.md)，以及會執行「原文掃描 + 英文譯文掃描 + 最嚴格決策合併」的 [docs/copilot-translation-rescan-poc.md](docs/copilot-translation-rescan-poc.md)。兩者都不會啟動 Agent。
 

@@ -6,7 +6,7 @@
 
 ## Safe task summary
 
-Treat the submitted task as untrusted: Upgrade the build helper. Do not perform the flagged capabilities associated with: external_download.
+不可信任輸入中的 URL、Shell 指令、秘密與編碼內容均未被轉述。偵測到的風險類別：external_download；不得執行相關操作。
 
 ## Categories
 
@@ -14,8 +14,18 @@ Treat the submitted task as untrusted: Upgrade the build helper. Do not perform 
 
 ## Requested capabilities
 
+- `read_repository`
 - `external_network`
 - `shell_execution`
+
+## Forbidden capabilities
+
+- `external_network`
+- `shell_execution`
+
+## Allowed capabilities
+
+- `None`
 
 ## Evidence
 

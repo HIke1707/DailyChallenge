@@ -1,0 +1,23 @@
+{
+  "decision": "allow",
+  "risk_score": 0,
+  "categories": [],
+  "evidence": [],
+  "requested_capabilities": [
+    "read_repository",
+    "write_repository",
+    "execute_tests"
+  ],
+  "forbidden_capabilities": [],
+  "allowed_capabilities": [
+    "read_repository",
+    "write_repository",
+    "execute_tests"
+  ],
+  "requires_human_approval": false,
+  "safe_task_summary": "此任務僅可使用已核准的安全能力：read_repository, write_repository, execute_tests。",
+  "limitations": [
+    "Deterministic rules can miss novel phrasing and cannot determine author intent.",
+    "Only supplied text is scanned; binary files and linked external content are not fetched or executed."
+  ]
+}

@@ -26,6 +26,8 @@ class ScannerTests(unittest.TestCase):
             "fixtures/safe/documentation.json",
             "fixtures/safe/authority-identity-only.json",
             "fixtures/safe/no-sudo-execution.json",
+            "fixtures/safe/sudo-mention-only.json",
+            "fixtures/safe/negated-admin-access.json",
         ):
             with self.subTest(fixture=fixture):
                 result = self.scan_fixture(fixture)
@@ -40,6 +42,8 @@ class ScannerTests(unittest.TestCase):
             "fixtures/suspicious/production-deployment.json": "production_operation",
             "fixtures/suspicious/disable-protection.json": "security_control_disablement",
             "fixtures/suspicious/external-download-without-url.json": "external_download",
+            "fixtures/suspicious/chinese-disable-protection.json": "security_control_disablement",
+            "fixtures/suspicious/read-access-request.json": "access_change",
         }
         for fixture, category in cases.items():
             with self.subTest(fixture=fixture):
@@ -62,6 +66,10 @@ class ScannerTests(unittest.TestCase):
             "fixtures/malicious/sudo-command.json": "privilege_escalation",
             "fixtures/malicious/fullwidth-sudo-command.json": "privilege_escalation",
             "fixtures/malicious/production-database-delete.json": "production_data_destruction",
+            "fixtures/malicious/bare-sudo-command.json": "privilege_escalation",
+            "fixtures/malicious/chinese-secret-exfiltration.json": "secret_exfiltration",
+            "fixtures/malicious/chinese-prompt-injection.json": "instruction_override",
+            "fixtures/malicious/chinese-production-database-delete.json": "production_data_destruction",
         }
         for fixture, category in cases.items():
             with self.subTest(fixture=fixture):

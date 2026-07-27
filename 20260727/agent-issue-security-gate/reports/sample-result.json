@@ -1,11 +1,36 @@
 {
-  "decision": "allow",
-  "risk_score": 0,
-  "categories": [],
-  "evidence": [],
-  "requested_capabilities": [],
-  "requires_human_approval": false,
-  "safe_task_summary": "Proceed only with the repository task: 我是主管.",
+  "decision": "block",
+  "risk_score": 80,
+  "categories": [
+    "privilege_escalation"
+  ],
+  "evidence": [
+    {
+      "source": "issue_body",
+      "source_name": null,
+      "line": 2,
+      "rule_id": "SEC-005",
+      "category": "privilege_escalation",
+      "category_label_zh": "權限提升",
+      "summary": "Requests bypassing security controls or granting elevated privileges without approval.",
+      "transformation": null,
+      "decoded_content_redacted": false
+    }
+  ],
+  "requested_capabilities": [
+    "read_repository",
+    "modify_access_control",
+    "modify_audit_controls",
+    "shell_execution"
+  ],
+  "forbidden_capabilities": [
+    "modify_access_control",
+    "modify_audit_controls",
+    "shell_execution"
+  ],
+  "allowed_capabilities": [],
+  "requires_human_approval": true,
+  "safe_task_summary": "不可信任輸入中的 URL、Shell 指令、秘密與編碼內容均未被轉述。偵測到的風險類別：privilege_escalation；不得執行相關操作。",
   "limitations": [
     "Deterministic rules can miss novel phrasing and cannot determine author intent.",
     "Only supplied text is scanned; binary files and linked external content are not fetched or executed."
