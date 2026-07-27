@@ -15,6 +15,8 @@ Repository 根目錄的 `.github/workflows/issue-security-gate.yml` 會在 Issue
 
 Workflow 不會在 shell 中插入 Issue 內容，也沒有任何 secrets、deploy、程式碼寫入權限或 Agent Task token。它只有讀取程式碼和管理 Issue 標籤的最小權限。
 
+每次成功掃描也會將 `issue-result.json` 與 `issue-result.md` 上傳為 GitHub Actions artifact，保存 7 天，供有 Repository read 權限的人在 Actions run 頁面下載。原始 intake JSON 與附件內容不會被上傳。Label 仍是即時決策標準；artifact 僅供人工稽核。
+
 GitHub Issue 事件不會提供 PDF 或其他附件的抽取文字；因此目前不下載附件。內文或留言中出現外部 URL 會由 `SEC-006` 進入 `review`。若要掃描 PDF，必須另建沒有 secrets、限制檔案大小與 MIME type 的隔離抽取服務，再把抽取文字送進 Gate。
 
 ## 自訂 Agent 設定

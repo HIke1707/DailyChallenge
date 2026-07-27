@@ -68,6 +68,17 @@ jobs:
             --output "$REPORT_DIRECTORY" \
             --report-name issue-result
 
+      - name: Retain security report for human review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-issue-security-report-${{ github.event.issue.number }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/agent-issue-reports/issue-result.json
+            ${{ runner.temp }}/agent-issue-reports/issue-result.md
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Apply the gate decision label
         if: always()
         uses: actions/github-script@v7
