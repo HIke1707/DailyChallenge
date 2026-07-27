@@ -30,6 +30,7 @@ Artifact 保存 1 天。`translation-response.json` 仍是從不可信任輸入�
 ## 安全限制
 
 - Copilot CLI 在空白暫存資料夾執行，沒有 Repository 寫入權限，且用空的工具 allowlist、停用內建 MCP、禁止存取暫存目錄。
+- Copilot CLI 使用 `-s` 靜默模式，因此輸出檔只保留模型回應；譯文仍必須通過嚴格 JSON 驗證。
 - Workflow 僅有 `contents: read`、`issues: read` 與 `copilot-requests: write` 權限；不使用 API key、PAT 或 Repository secret。
 - 為了測試「AI 不能解除 block」，即使原文已被 scanner 判定為 `block`，POC 仍會在受限環境進行翻譯和第二次掃描；最終決策永遠不會因為譯文而變寬鬆。
 - Issue 與前 10 則留言都限制為每段 4,000 字元；任何截斷都會 fail closed，因此不會產生 allow。

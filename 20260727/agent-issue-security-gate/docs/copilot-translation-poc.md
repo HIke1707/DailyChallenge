@@ -36,6 +36,8 @@ permissions:
 
 `--allow-all-tools` 只用於滿足 Copilot CLI 的非互動模式；搭配空的 available-tools allowlist 時，模型沒有可用工具。這個 POC 不使用 `--yolo`、`--allow-all`、`--allow-all-paths` 或 `--allow-all-urls`。
 
+Copilot CLI 以 `-s` 靜默模式執行，讓輸出檔只包含模型回應，不混入模型資訊或終端裝飾文字；翻譯結果仍必須通過嚴格 JSON 驗證。
+
 Issue 輸入被限制為 title、body、前 10 則 comment；每個欄位最多 4,000 字元。超出時翻譯輸出會帶有 `truncated: true`，不得將此結果用於正式 allow 決策。
 
 ## 前置條件與可能結果

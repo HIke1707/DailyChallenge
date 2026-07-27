@@ -89,6 +89,7 @@ jobs:
           cd "$RUNNER_TEMP/copilot-translation-poc"
           PROMPT="$(<"$PROMPT_PATH")"
           copilot \
+            -s \
             --available-tools='' \
             --allow-all-tools \
             --disable-builtin-mcps \
