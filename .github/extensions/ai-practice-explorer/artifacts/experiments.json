@@ -18,9 +18,33 @@
     "type": "agent-skill",
     "score": 4,
     "hours": 6.5,
-    "enjoyment": 5,
+    "enjoyment": 2,
     "level": 2,
     "wouldRepeat": false,
     "lesson": "Use prompt scaffolding for multi-turn tasks"
+  },
+  {
+    "id": "20260727-agent-issue-security-gate",
+    "date": "2026-07-27",
+    "title": "Issue Security gate",
+    "type": "security",
+    "score": 92,
+    "hours": 6,
+    "enjoyment": 3,
+    "level": 3,
+    "wouldRepeat": false,
+    "lesson": "建立可重複印用流程檢查github issue傳入內容"
+  },
+  {
+    "id": "20260728-copilot-canvas",
+    "date": "2026-07-28",
+    "title": "copilot-canvas",
+    "type": "praticle skills",
+    "score": ,
+    "hours": 4,
+    "enjoyment": 4,
+    "level": 1,
+    "wouldRepeat": false,
+    "lesson": "建立copilot儀表板"
   }
 ]
