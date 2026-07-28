@@ -93,6 +93,7 @@ function renderHtml(instanceId) {
   </div>
   <div class="right">
     Sort: <select id="sortSelect"><option value="date">Date</option><option value="score">Avg Score</option><option value="enjoyment">Avg Enjoy</option><option value="hours">Total Hours</option></select>
+    <button id="addBtn" style="margin-left:8px;padding:6px 10px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer">＋ Add</button>
   </div>
 </div>
 <div class="mini-dashboard" id="miniDashboard"></div>
@@ -113,15 +114,53 @@ function groupByType(items){ const map = new Map(); for(const it of items){ cons
 
 function statsForGroup(arr){ const count = arr.length; const totalHours = arr.reduce((s,x)=>s+(Number(x.hours)||0),0); const avgScore = count? (arr.reduce((s,x)=>s+(Number(x.score)||0),0)/count):0; const avgEnjoy = count? (arr.reduce((s,x)=>s+(Number(x.enjoyment)||0),0)/count):0; return {count,totalHours,avgScore,avgEnjoy}; }
 
-function computeSuggestion(groupStats){ // prefer types with high avgEnjoy but lower exposure
-  const scores = Array.from(groupStats.entries()).map(([type,st])=>({type,score:st.avgEnjoy - (st.count/10)}));
-  scores.sort((a,b)=>b.score - a.score);
-  return scores.length? scores[0].type : null;
+function computeSuggestion(groupStats){
+  // New heuristic:
+  // - If a type has zero items, prefer it strongly (untried)
+  // - Otherwise prefer types with higher avgEnjoy, older recency (days since last) and lower count
+  const now = Date.now();
+  const LIST = [];
+  for(const [type,st] of groupStats.entries()){
+    if(st.count === 0){ LIST.push({type,score: 999}); continue; }
+    const daysSince = st.lastDate ? Math.max(0, (now - st.lastDate) / (1000*60*60*24)) : 30;
+    const recencyFactor = Math.min(1, daysSince/30); // 0..1, larger = older
+    const score = (st.avgEnjoy || 0) * 1.2 + recencyFactor * 1.8 - (st.count * 0.25);
+    LIST.push({type,score});
+  }
+  LIST.sort((a,b)=>b.score - a.score);
+  return LIST.length? LIST[0].type : null;
 }
 
-function renderMiniDashboard(groupStats){ const el = document.getElementById('miniDashboard'); el.innerHTML=''; for(const [type,st] of groupStats.entries()){ const d = document.createElement('div'); d.className='mini-card'; d.innerHTML = `<h3>${escapeHtml(type)}</h3><p>Avg Enjoy: ${st.avgEnjoy.toFixed(2)} • Avg Score: ${st.avgScore.toFixed(2)}</p>`; el.appendChild(d); } const suggestion = computeSuggestion(groupStats); if(suggestion){ const s = document.createElement('div'); s.className='mini-card'; s.innerHTML=`<h3>Suggested</h3><p>Try: <strong>${escapeHtml(suggestion)}</strong></p>`; el.insertBefore(s, el.firstChild); } }
+function renderMiniDashboard(groupStats){
+  const el = document.getElementById('miniDashboard'); el.innerHTML='';
+  for(const [type,st] of groupStats.entries()){
+    const card = document.createElement('div'); card.className='mini-card';
+    const scorePct = Math.max(0,Math.min(100, (st.avgScore||0)))/100;
+    const enjoyPct = Math.max(0,Math.min(5, (st.avgEnjoy||0)))/5;
+    card.innerHTML = `<h3>${escapeHtml(type)}</h3><div style="display:flex;gap:8px;align-items:center;margin-top:6px"><svg width="48" height="48" viewBox="0 0 36 36"><path d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" fill="#f6f0ea" stroke="#efe1d0" stroke-width="2"></path><path d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="${scorePct*100} 100" transform="rotate(-90 18 18)"></path></svg><div style="font-size:12px;color:var(--muted)">S:${(st.avgScore||0).toFixed(1)}<br>E:${(st.avgEnjoy||0).toFixed(2)}</div></div>`;
+    el.appendChild(card);
+  }
+  const suggestion = computeSuggestion(groupStats);
+  if(suggestion){ const s = document.createElement('div'); s.className='mini-card'; s.innerHTML=`<h3>Suggested</h3><p style="margin-top:6px">Try: <strong>${escapeHtml(suggestion)}</strong></p>`; el.insertBefore(s, el.firstChild); }
+}
 
-function renderGroups(filteredTypes, repeatOnly, sortKey){ const groups = groupByType(experiments); const groupStats = new Map(); for(const [type,arr] of groups.entries()) groupStats.set(type, statsForGroup(arr));
+// Modal utilities for 'View All' and 'Add Record'
+function openModal(html){
+  let m = document.getElementById('modal');
+  if(!m){ m = document.createElement('div'); m.id='modal'; m.style.position='fixed'; m.style.left=0; m.style.top=0; m.style.right=0; m.style.bottom=0; m.style.background='rgba(0,0,0,0.3)'; m.style.display='flex'; m.style.alignItems='center'; m.style.justifyContent='center'; m.innerHTML = `<div id="modalInner" style="background:var(--card-bg);padding:14px;border-radius:12px;max-width:900px;max-height:80vh;overflow:auto;"></div>`; document.body.appendChild(m); }
+  document.getElementById('modalInner').innerHTML = html + `<div style="text-align:right;margin-top:8px"><button id="closeModal" style="padding:6px 10px;border-radius:8px;background:#eee;border:none;">Close</button></div>`;
+  document.getElementById('closeModal').onclick = ()=>{ m.remove(); };
+}
+
+function renderGroups(filteredTypes, repeatOnly, sortKey){
+  const groups = groupByType(experiments);
+  const groupStats = new Map();
+  for(const [type,arr] of groups.entries()){
+    const st = statsForGroup(arr);
+    // lastDate for recency
+    st.lastDate = arr.reduce((mx,x)=> Math.max(mx, new Date(x.date).getTime()), 0);
+    groupStats.set(type, st);
+  }
   renderMiniDashboard(groupStats);
   // prepare ordering
   let entries = Array.from(groups.entries()).filter(([t])=> !filteredTypes.size || filteredTypes.has(t));
@@ -145,6 +184,13 @@ function renderGroups(filteredTypes, repeatOnly, sortKey){ const groups = groupB
   for(const [type,arr,st] of entries){
     const g = document.createElement('div'); g.className='group-row';
     const header = document.createElement('div'); header.className='row-title'; header.innerHTML = `<div>${escapeHtml(type)} (${st.count})</div><div style="font-size:12px;color:var(--muted)">AvgE:${st.avgEnjoy.toFixed(2)} • AvgS:${st.avgScore.toFixed(2)}</div>`;
+    // add View All button
+    const viewAllBtn = document.createElement('button'); viewAllBtn.textContent='View all'; viewAllBtn.style.marginLeft='8px'; viewAllBtn.style.padding='6px 8px'; viewAllBtn.style.borderRadius='8px'; viewAllBtn.style.border='1px solid #eee'; viewAllBtn.onclick = ()=>{
+      // build full list html with pagination
+      const pageSize = 10; let page = 0; const items = arr.slice().sort((a,b)=> new Date(b.date)-new Date(a.date));
+      function renderPage(){ const start = page*pageSize; const slice = items.slice(start,start+pageSize); const rows = slice.map(it=>`<div style="padding:8px;border-bottom:1px solid #f2eee6"><strong>${escapeHtml(it.title)}</strong> <span style="color:var(--muted);font-size:12px">${escapeHtml(it.date)}</span><div style="font-size:13px;color:var(--muted)">Score:${it.score} Enjoy:${it.enjoyment} Hours:${it.hours}</div></div>`).join(''); const controls = `<div style="display:flex;justify-content:space-between;margin-top:8px"><button id="prevPage" ${page===0?'disabled':''}>Prev</button><div>Page ${page+1} / ${Math.ceil(items.length/pageSize)}</div><button id="nextPage" ${start+pageSize>=items.length?'disabled':''}>Next</button></div>`; openModal(`<h3>${escapeHtml(type)} — all (${items.length})</h3>${rows}${controls}`); document.getElementById('prevPage').onclick = ()=>{ page = Math.max(0,page-1); renderPage(); }; document.getElementById('nextPage').onclick = ()=>{ page = Math.min(Math.ceil(items.length/pageSize)-1,page+1); renderPage(); }; }
+    };
+    header.appendChild(viewAllBtn);
     const row = document.createElement('div'); row.className='row-scroll';
     // sort items in row by date desc
     arr.sort((a,b)=> new Date(b.date)-new Date(a.date));
@@ -194,6 +240,52 @@ document.getElementById('typeFilter').addEventListener('change', ()=>loadAndRend
 document.getElementById('repeatOnly').addEventListener('change', ()=>loadAndRender());
 document.getElementById('sortSelect').addEventListener('change', ()=>loadAndRender());
 
+// Add record button handler
+const addBtn = document.getElementById('addBtn');
+if(addBtn){
+  addBtn.addEventListener('click', ()=>{
+    // build add form
+    const types = Array.from(new Set(experiments.map(e=>e.type).filter(Boolean))).sort();
+    const typeOptions = ['<option value="">(select)</option>'].concat(types.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`)).join('');
+    const form = `
+      <h3>Add Experiment</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <label>Title<input id="new_title" type="text"></label>
+        <label>Date<input id="new_date" type="date" value="${new Date().toISOString().slice(0,10)}"></label>
+        <label>Type<select id="new_type">${typeOptions}</select></label>
+        <label>Score<input id="new_score" type="number" value="0"></label>
+        <label>Hours<input id="new_hours" type="number" step="0.1" value="0"></label>
+        <label>Enjoy<input id="new_enjoy" type="number" min="1" max="5" value="3"></label>
+        <label>Level<input id="new_level" type="number" min="1" max="3" value="1"></label>
+        <label style="grid-column:1/-1">Lesson<input id="new_lesson" type="text"></label>
+        <label style="display:flex;align-items:center;gap:8px"><input id="new_repeat" type="checkbox"> Would Repeat</label>
+      </div>
+      <div style="text-align:right;margin-top:8px"><button id="submitAdd" style="padding:6px 10px;border-radius:8px;background:var(--accent);color:#fff;border:none">Create</button></div>
+    `;
+    openModal(form);
+    document.getElementById('submitAdd').onclick = async ()=>{
+      const rec = {
+        title: document.getElementById('new_title').value,
+        date: document.getElementById('new_date').value,
+        type: document.getElementById('new_type').value || 'misc',
+        score: Number(document.getElementById('new_score').value||0),
+        hours: Number(document.getElementById('new_hours').value||0),
+        enjoyment: Number(document.getElementById('new_enjoy').value||0),
+        level: Number(document.getElementById('new_level').value||1),
+        wouldRepeat: !!document.getElementById('new_repeat').checked,
+        lesson: document.getElementById('new_lesson').value || ''
+      };
+      try{
+        const created = await fetchJson('/api/experiments', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(rec) });
+        hideError();
+        // close modal
+        const m = document.getElementById('modal'); if(m) m.remove();
+        await loadAndRender();
+      }catch(err){ /* banner shown */ }
+    };
+  });
+}
+
 loadAndRender();
 </script>
 </body>
@@ -220,6 +312,38 @@ async function startServer(instanceId) {
                 const arr = await readExperiments();
                 res.setHeader("Content-Type", "application/json; charset=utf-8");
                 res.end(JSON.stringify(arr));
+                return;
+            }
+
+            // Create new experiment: POST /api/experiments with JSON body
+            if (base.pathname === "/api/experiments" && req.method === "POST") {
+                const body = await new Promise((resolve, reject) => {
+                    let b = "";
+                    req.on('data', c => b += c.toString());
+                    req.on('end', () => resolve(b));
+                    req.on('error', reject);
+                });
+                const rec = JSON.parse(body || '{}');
+                if (!rec.id) {
+                    // generate id
+                    const slug = (rec.title || 'untitled').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                    rec.id = `${(rec.date || new Date().toISOString().slice(0,10)).replace(/-/g,'')}-${slug}`;
+                }
+                const arr = await readExperiments();
+                if (arr.find(x => x.id === rec.id)) {
+                    res.statusCode = 409; res.end(JSON.stringify({ error: 'exists' })); return;
+                }
+                // enforce schema defaults
+                rec.score = rec.score || 0;
+                rec.hours = rec.hours || 0;
+                rec.enjoyment = rec.enjoyment || 0;
+                rec.level = rec.level || 1;
+                rec.wouldRepeat = !!rec.wouldRepeat;
+                arr.push(rec);
+                await writeExperiments(arr);
+                res.statusCode = 201;
+                res.setHeader("Content-Type", "application/json; charset=utf-8");
+                res.end(JSON.stringify(rec));
                 return;
             }
 
