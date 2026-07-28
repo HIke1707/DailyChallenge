@@ -1,0 +1,13 @@
+{
+  "name": "ai-practice-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline Canvas extension for reviewing AI practice records.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check extension.mjs && node --check assets/app.js"
+  }
+}
