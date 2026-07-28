@@ -1,0 +1,26 @@
+[
+  {
+    "id": "20260724-api-auditor",
+    "date": "2026-07-24",
+    "title": "OpenAI API Deprecation Auditor",
+    "type": "agent-skill",
+    "score": 87,
+    "hours": 4.2,
+    "enjoyment": 2,
+    "level": 1,
+    "wouldRepeat": false,
+    "lesson": "將確定性掃描與 AI 判斷分離"
+  },
+  {
+    "id": "20260720-dialogue-agent",
+    "date": "2026-07-20",
+    "title": "Interactive Dialogue Agent",
+    "type": "agent-skill",
+    "score": 4,
+    "hours": 6.5,
+    "enjoyment": 5,
+    "level": 2,
+    "wouldRepeat": false,
+    "lesson": "Use prompt scaffolding for multi-turn tasks"
+  }
+]
