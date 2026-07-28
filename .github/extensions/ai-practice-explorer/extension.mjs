@@ -47,47 +47,71 @@ function safeUpdateFields(target, patch) {
 }
 
 function renderHtml(instanceId) {
-    // Simple single-file UI: fetch experiments, render cards, filter by type, show stats, and allow editing existing records.
+    // UI: warm, compact cards; error banner; gentler typography and field sizes.
     return `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8" />
 <title>AI Practice Explorer</title>
 <style>
-  :root{--card-bg:var(--color-white,#fff);--card-border:var(--border-color-default,#e6e6e6);--accent:var(--true-color-blue,#0366d6);--muted:#6b7280}
-  body{font-family:var(--font-sans,system-ui);margin:0;padding:22px;background:var(--background-color-default,#f6f7fa);color:var(--text-color-default,#0f1724);-webkit-font-smoothing:antialiased}
-  h1{font-size:22px;margin:0 0 14px;color:var(--text-color-default,#0b1220)}
-  .controls{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
-  .controls .left{display:flex;gap:12px;align-items:center}
-  .stats{display:flex;gap:12px;align-items:center}
-  .stat{background:var(--card-bg);border:1px solid var(--card-border);padding:8px 12px;border-radius:10px;font-size:13px;color:var(--muted)}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
-  .card{background:var(--card-bg);border:1px solid var(--card-border);padding:16px;border-radius:12px;box-shadow:0 4px 10px rgba(2,6,23,0.04);transition:transform .12s ease,box-shadow .12s ease}
-  .card:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(2,6,23,0.08)}
-  .card h2{margin:0;font-size:18px}
+  :root{
+    --bg:#fbf7f2; --card-bg:#ffffff; --card-border:#f0e6dd; --accent:#d97706; --muted:#6b5b49; --soft:#f6efe9;
+    --text:#2b2b2b; --radius:10px;
+  }
+  body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0;padding:20px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  h1{font-size:18px;margin:0 0 10px;font-weight:600;color:var(--text)}
+  .banner{display:none;padding:10px 14px;border-radius:8px;background:#fff4e6;border:1px solid #f5d9b8;color:#8a4b00;margin-bottom:12px}
+  .banner .msg{font-size:13px}
+  .controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+  .controls .left{display:flex;gap:10px;align-items:center}
+  .controls select{padding:6px 8px;border-radius:8px;border:1px solid var(--card-border);background:transparent}
+  .stats{display:flex;gap:8px;align-items:center}
+  .stat{background:transparent;border:1px solid transparent;padding:6px 8px;border-radius:8px;font-size:13px;color:var(--muted)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .card{background:var(--card-bg);border:1px solid var(--card-border);padding:12px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(43,43,43,0.04);transition:transform .12s ease,box-shadow .12s ease}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(43,43,43,0.06)}
+  .card h2{margin:0;font-size:14px;font-weight:600}
   .meta{font-size:12px;color:var(--muted);margin-top:6px}
-  .fields{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .fields{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   label{font-size:13px;color:var(--muted);display:flex;flex-direction:column}
-  input[type="number"], input[type="text"]{padding:8px;border-radius:8px;border:1px solid var(--card-border);min-width:96px}
-  input:focus{outline:2px solid rgba(3,102,214,0.12);box-shadow:0 0 0 4px rgba(3,102,214,0.06)}
-  .save{margin-top:12px;text-align:right}
-  button.save-btn{background:var(--accent);color:#fff;border:none;padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-  button.save-btn:hover{filter:brightness(1.05)}
+  input[type="number"], input[type="text"]{padding:6px;border-radius:8px;border:1px solid #efe6dd;min-width:72px;font-size:13px}
+  input:focus{outline:2px solid rgba(217,119,6,0.12);box-shadow:0 0 0 4px rgba(217,119,6,0.06)}
+  .save{margin-top:10px;text-align:right}
+  button.save-btn{background:var(--accent);color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px}
   button.save-btn[disabled]{opacity:0.6;cursor:default}
+  .lesson{margin-top:8px;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
 <h1>AI Practice Explorer</h1>
+<div id="errorBanner" class="banner" role="alert"><span class="msg"></span> <button id="dismissBanner" style="float:right;background:none;border:none;color:var(--muted);cursor:pointer">✕</button></div>
 <div class="controls">
-  <div>Filter: <select id="typeFilter"><option value="">(all)</option></select></div>
-  <div id="stats"></div>
+  <div class="left">Filter: <select id="typeFilter"><option value="">(all)</option></select></div>
+  <div id="stats" class="stats"></div>
 </div>
 <div id="cards" class="cards"></div>
 <script>
+function showError(msg){
+  const b = document.getElementById('errorBanner');
+  b.style.display = 'block';
+  b.querySelector('.msg').textContent = msg;
+}
+function hideError(){ document.getElementById('errorBanner').style.display='none'; }
+
+document.getElementById('dismissBanner').addEventListener('click', hideError);
+
 async function fetchJson(path, opts){
-  const res = await fetch(path, opts);
-  if(!res.ok) throw new Error(await res.text());
-  return res.json();
+  try{
+    const res = await fetch(path, opts);
+    if(!res.ok){
+      const body = await res.text();
+      throw new Error(body || res.statusText || 'request failed');
+    }
+    return res.json();
+  }catch(err){
+    showError('載入資料失敗：' + (err.message || err));
+    throw err;
+  }
 }
 
 let experiments = [];
@@ -99,7 +123,7 @@ function renderStats() {
   for(const e of experiments){ stats.totalHours += Number(e.hours||0); scoreSum += Number(e.score||0); enjoySum += Number(e.enjoyment||0); }
   stats.avgScore = experiments.length? (scoreSum/experiments.length).toFixed(2):"-";
   stats.avgEnjoy = experiments.length? (enjoySum/experiments.length).toFixed(2):"-";
-  document.getElementById('stats').innerHTML = '<span class="stat">Count: ' + stats.count + '</span><span class="stat">Total hours: ' + stats.totalHours.toFixed(1) + '</span><span class="stat">Avg score: ' + stats.avgScore + '</span><span class="stat">Avg enjoyment: ' + stats.avgEnjoy + '</span>';
+  document.getElementById('stats').innerHTML = '<div class="stat">Count: ' + stats.count + '</div><div class="stat">Hours: ' + stats.totalHours.toFixed(1) + '</div><div class="stat">Avg score: ' + stats.avgScore + '</div>';
 }
 
 function renderCards() {
@@ -109,7 +133,16 @@ function renderCards() {
   const list = experiments.filter(e => !filter || e.type === filter);
   for(const e of list){
     const div = document.createElement('div'); div.className='card';
-    div.innerHTML = '<strong>' + escapeHtml(e.title) + '</strong><div style="font-size:12px;color:#666">' + escapeHtml(e.type) + ' • ' + escapeHtml(e.date) + '</div><div style="margin-top:6px"><label>Score: <input type="number" step="1" id="score-' + e.id + '" value="' + (Number(e.score)||0) + '"></label><label>Hours: <input type="number" step="0.1" id="hours-' + e.id + '" value="' + (Number(e.hours)||0) + '"></label><label>Enjoyment: <input type="number" min="1" max="5" id="enjoy-' + e.id + '" value="' + (Number(e.enjoyment)||0) + '"></label><label>Level: <input type="number" min="1" max="3" id="level-' + e.id + '" value="' + (Number(e.level)||0) + '"></label><label><input type="checkbox" id="repeat-' + e.id + '" ' + (e.wouldRepeat? 'checked':'') + '> Would Repeat</label></div><div style="margin-top:6px"><em>' + escapeHtml(e.lesson||'') + '</em></div><div class="save"><button data-id="' + e.id + '">Save</button></div>';
+    div.innerHTML = '<h2>' + escapeHtml(e.title) + '</h2><div class="meta">' + escapeHtml(e.type) + ' • ' + escapeHtml(e.date) + '</div>' +
+      '<div class="fields">' +
+      '<label>Score<input type="number" step="1" id="score-' + e.id + '" value="' + (Number(e.score)||0) + '"></label>' +
+      '<label>Hours<input type="number" step="0.1" id="hours-' + e.id + '" value="' + (Number(e.hours)||0) + '"></label>' +
+      '<label>Enjoy<input type="number" min="1" max="5" id="enjoy-' + e.id + '" value="' + (Number(e.enjoyment)||0) + '"></label>' +
+      '<label>Level<input type="number" min="1" max="3" id="level-' + e.id + '" value="' + (Number(e.level)||0) + '"></label>' +
+      '<label style="align-items:center"><input type="checkbox" id="repeat-' + e.id + '" ' + (e.wouldRepeat? 'checked':'') + ' style="margin-right:6px">Would Repeat</label>' +
+      '</div>' +
+      '<div class="lesson">' + escapeHtml(e.lesson||'') + '</div>' +
+      '<div class="save"><button class="save-btn" data-id="' + e.id + '">Save</button></div>';
     container.appendChild(div);
   }
   // attach save handlers
@@ -126,9 +159,10 @@ function renderCards() {
       btn.disabled = true; btn.textContent='Saving...';
       try{
         await fetchJson('/api/experiments/' + encodeURIComponent(id), { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(patch) });
+        hideError();
         await loadAndRender();
       }catch(err){
-        alert('Save failed: '+err.message);
+        // error already shown by fetchJson
       }finally{btn.disabled=false;btn.textContent='Save'}
     });
   });
@@ -137,7 +171,12 @@ function renderCards() {
 function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function loadAndRender(){
-  experiments = await fetchJson('/api/experiments');
+  try{
+    experiments = await fetchJson('/api/experiments');
+  }catch(err){
+    // fetchJson already shows banner; stop further rendering
+    return;
+  }
   // populate types
   types = new Set(experiments.map(e=>e.type).filter(Boolean));
   const sel = document.getElementById('typeFilter');
@@ -151,7 +190,7 @@ async function loadAndRender(){
 
 document.getElementById('typeFilter').addEventListener('change', ()=>{ renderCards(); });
 
-loadAndRender().catch(err=>document.body.appendChild(Object.assign(document.createElement('pre'),{textContent:err.stack||err}))); 
+loadAndRender(); 
 </script>
 </body>
 </html>`;
