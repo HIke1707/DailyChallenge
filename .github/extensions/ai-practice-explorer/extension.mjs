@@ -54,14 +54,23 @@ function renderHtml(instanceId) {
 <meta charset="utf-8" />
 <title>AI Practice Explorer</title>
 <style>
-  body{font-family:var(--font-sans,system-ui);margin:0;padding:16px;background:var(--background-color-default,#fff);color:var(--text-color-default,#111)}
-  .controls{display:flex;gap:1rem;align-items:center;margin-bottom:1rem}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-  .card{border:1px solid var(--border-color-default,#ddd);padding:12px;border-radius:8px;background:var(--color-white,#fff)}
-  .stat{display:inline-block;margin-right:12px}
-  label{display:block;font-size:12px;color:var(--text-color-muted,#666)}
-  input[type="number"]{width:6rem}
-  .save{margin-top:8px}
+  :root{--card-bg:var(--color-white,#fff);--card-border:var(--border-color-default,#e6e6e6);--accent:var(--true-color-blue,#0366d6)}
+  body{font-family:var(--font-sans,system-ui);margin:0;padding:20px;background:var(--background-color-default,#f7f8fa);color:var(--text-color-default,#111);-webkit-font-smoothing:antialiased}
+  h1{font-size:20px;margin:0 0 12px}
+  .controls{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}
+  .controls .left{display:flex;gap:12px;align-items:center}
+  .stats{display:flex;gap:12px;align-items:center}
+  .stat{background:var(--card-bg);border:1px solid var(--card-border);padding:8px 12px;border-radius:8px;font-size:13px;color:var(--text-color-muted,#444)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .card{background:var(--card-bg);border:1px solid var(--card-border);padding:14px;border-radius:10px;box-shadow:0 1px 2px rgba(16,24,40,0.04)}
+  .card h2{margin:0;font-size:16px}
+  .meta{font-size:12px;color:var(--text-color-muted,#666);margin-top:6px}
+  .fields{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  label{font-size:12px;color:var(--text-color-muted,#666);display:flex;flex-direction:column}
+  input[type="number"], input[type="text"]{padding:6px;border-radius:6px;border:1px solid var(--card-border);min-width:80px}
+  .save{margin-top:10px;text-align:right}
+  button.save-btn{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+  button.save-btn[disabled]{opacity:0.6;cursor:default}
 </style>
 </head>
 <body>
