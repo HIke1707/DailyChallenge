@@ -1,0 +1,50 @@
+[
+  {
+    "id": "20260724-api-auditor",
+    "date": "2026-07-24",
+    "title": "OpenAI API Deprecation Auditor",
+    "type": "agent-skill",
+    "score": 87,
+    "hours": 4.2,
+    "enjoyment": 2,
+    "level": 1,
+    "wouldRepeat": false,
+    "lesson": "將確定性掃描與 AI 判斷分離"
+  },
+  {
+    "id": "20260720-dialogue-agent",
+    "date": "2026-07-20",
+    "title": "Interactive Dialogue Agent",
+    "type": "agent-skill",
+    "score": 4,
+    "hours": 6.5,
+    "enjoyment": 2,
+    "level": 2,
+    "wouldRepeat": false,
+    "lesson": "Use prompt scaffolding for multi-turn tasks"
+  },
+  {
+    "id": "20260727-agent-issue-security-gate",
+    "date": "2026-07-27",
+    "title": "Issue Security gate",
+    "type": "security",
+    "score": 92,
+    "hours": 6,
+    "enjoyment": 3,
+    "level": 3,
+    "wouldRepeat": false,
+    "lesson": "建立可重複印用流程檢查github issue傳入內容"
+  },
+  {
+    "id": "20260728-copilot-canvas",
+    "date": "2026-07-28",
+    "title": "copilot-canvas",
+    "type": "practice-skill",
+    "score": 0,
+    "hours": 4,
+    "enjoyment": 4,
+    "level": 1,
+    "wouldRepeat": false,
+    "lesson": "建立copilot儀表板"
+  }
+]
