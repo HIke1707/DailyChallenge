@@ -89,6 +89,7 @@ function renderGroups(filteredTypes, repeatOnly, sortKey){
         '<label>Score<input type="number" step="1" id="score-' + e.id + '" value="' + (Number(e.score)||0) + '"></label>' +
         '<label>Hours<input type="number" step="0.1" id="hours-' + e.id + '" value="' + (Number(e.hours)||0) + '"></label>' +
         '<label>Enjoy<input type="number" min="1" max="5" id="enjoy-' + e.id + '" value="' + (Number(e.enjoyment)||0) + '"></label>' +
+        '<label>Level<input type="number" min="1" max="3" id="level-' + e.id + '" value="' + (Number(e.level)||1) + '"></label>' +
         '<label style="display:flex;align-items:center;justify-content:space-between">Would Repeat<input type="checkbox" id="repeat-' + e.id + '" ' + (e.wouldRepeat ? 'checked' : '') + '></label>' +
         '</div><div class="lesson">' + escapeHtml(e.lesson||'') + '</div><div class="save"><button class="save-btn" data-id="' + e.id + '">Save</button></div>';
       row.appendChild(card);
