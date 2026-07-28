@@ -47,7 +47,7 @@ function safeUpdateFields(target, patch) {
 }
 
 function renderHtml(instanceId) {
-    // UI: warm, compact cards; error banner; gentler typography and field sizes.
+    // Enhanced UI: grouped by type with horizontal rows, top mini-dashboard, and controls
     return `<!doctype html>
 <html>
 <head>
@@ -55,95 +55,107 @@ function renderHtml(instanceId) {
 <title>AI Practice Explorer</title>
 <style>
   :root{
-    --bg:#fbf7f2; --card-bg:#ffffff; --card-border:#f0e6dd; --accent:#d97706; --muted:#6b5b49; --soft:#f6efe9;
-    --text:#2b2b2b; --radius:10px;
+    --bg:#fbf6f0; --card-bg:#fff; --card-border:#efe1d0; --accent:#d97706; --muted:#6b5b49; --soft:#f8efe6;
+    --text:#2b2b2b; --radius:10px; --card-small-w:200px;
   }
-  body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0;padding:20px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-  h1{font-size:18px;margin:0 0 10px;font-weight:600;color:var(--text)}
-  .banner{display:none;padding:10px 14px;border-radius:8px;background:#fff4e6;border:1px solid #f5d9b8;color:#8a4b00;margin-bottom:12px}
-  .banner .msg{font-size:13px}
-  .controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+  body{font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0;padding:18px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  h1{font-size:18px;margin:0 0 8px;font-weight:700;color:var(--text)}
+  .banner{display:none;padding:10px 14px;border-radius:8px;background:#fff4e6;border:1px solid #f5d9b8;color:#8a4b00;margin-bottom:10px}
+  .controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
   .controls .left{display:flex;gap:10px;align-items:center}
-  .controls select{padding:6px 8px;border-radius:8px;border:1px solid var(--card-border);background:transparent}
-  .stats{display:flex;gap:8px;align-items:center}
-  .stat{background:transparent;border:1px solid transparent;padding:6px 8px;border-radius:8px;font-size:13px;color:var(--muted)}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-  .card{background:var(--card-bg);border:1px solid var(--card-border);padding:12px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(43,43,43,0.04);transition:transform .12s ease,box-shadow .12s ease}
-  .card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(43,43,43,0.06)}
-  .card h2{margin:0;font-size:14px;font-weight:600}
-  .meta{font-size:12px;color:var(--muted);margin-top:6px}
-  .fields{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-  label{font-size:13px;color:var(--muted);display:flex;flex-direction:column}
-  input[type="number"], input[type="text"]{padding:6px;border-radius:8px;border:1px solid #efe6dd;min-width:72px;font-size:13px}
-  input:focus{outline:2px solid rgba(217,119,6,0.12);box-shadow:0 0 0 4px rgba(217,119,6,0.06)}
-  .save{margin-top:10px;text-align:right}
-  button.save-btn{background:var(--accent);color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px}
-  button.save-btn[disabled]{opacity:0.6;cursor:default}
-  .lesson{margin-top:8px;font-size:12px;color:var(--muted)}
+  select,input[type=checkbox]{padding:6px;border-radius:8px;border:1px solid var(--card-border);background:transparent}
+  .controls .right{display:flex;gap:8px;align-items:center}
+  .mini-dashboard{display:flex;gap:10px;align-items:stretch;margin-bottom:12px}
+  .mini-card{background:var(--card-bg);border:1px solid var(--card-border);padding:10px;border-radius:10px;min-width:120px}
+  .mini-card h3{margin:0;font-size:13px}
+  .mini-card p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+  .group-row{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .group-row .row-title{font-weight:700;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+  .row-scroll{display:flex;gap:10px;overflow-x:auto;padding:8px 0}
+  .card{width:var(--card-small-w);background:var(--card-bg);border:1px solid var(--card-border);padding:10px;border-radius:12px;box-shadow:0 6px 18px rgba(43,43,43,0.04);flex:0 0 auto}
+  .card h4{margin:0;font-size:13px}
+  .meta{font-size:11px;color:var(--muted);margin-top:6px}
+  .fields{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  label{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+  input[type="number"], input[type="text"]{padding:6px;border-radius:8px;border:1px solid #efe6dd;min-width:68px;font-size:12px;text-align:right}
+  .save{margin-top:8px;text-align:right}
+  button.save-btn{background:var(--accent);color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px}
+  .lesson{margin-top:6px;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
 <h1>AI Practice Explorer</h1>
 <div id="errorBanner" class="banner" role="alert"><span class="msg"></span> <button id="dismissBanner" style="float:right;background:none;border:none;color:var(--muted);cursor:pointer">✕</button></div>
 <div class="controls">
-  <div class="left">Filter: <select id="typeFilter"><option value="">(all)</option></select></div>
-  <div id="stats" class="stats"></div>
+  <div class="left">
+    Type: <select id="typeFilter"><option value="">(all)</option></select>
+    <label style="display:flex;align-items:center;gap:6px;margin-left:6px"><input type="checkbox" id="repeatOnly"> Only Would Repeat</label>
+  </div>
+  <div class="right">
+    Sort: <select id="sortSelect"><option value="date">Date</option><option value="score">Avg Score</option><option value="enjoyment">Avg Enjoy</option><option value="hours">Total Hours</option></select>
+  </div>
 </div>
-<div id="cards" class="cards"></div>
+<div class="mini-dashboard" id="miniDashboard"></div>
+<div id="groups"></div>
 <script>
-function showError(msg){
-  const b = document.getElementById('errorBanner');
-  b.style.display = 'block';
-  b.querySelector('.msg').textContent = msg;
-}
+function showError(msg){ const b = document.getElementById('errorBanner'); b.style.display='block'; b.querySelector('.msg').textContent = msg; }
 function hideError(){ document.getElementById('errorBanner').style.display='none'; }
-
 document.getElementById('dismissBanner').addEventListener('click', hideError);
 
 async function fetchJson(path, opts){
-  try{
-    const res = await fetch(path, opts);
-    if(!res.ok){
-      const body = await res.text();
-      throw new Error(body || res.statusText || 'request failed');
-    }
-    return res.json();
-  }catch(err){
-    showError('載入資料失敗：' + (err.message || err));
-    throw err;
-  }
+  try{ const res = await fetch(path, opts); if(!res.ok){ const body = await res.text(); throw new Error(body || res.statusText); } return res.json(); }
+  catch(err){ showError('載入資料失敗：' + (err.message||err)); throw err; }
 }
 
 let experiments = [];
-let types = new Set();
 
-function renderStats() {
-  const stats = {count: experiments.length, totalHours:0, avgScore:0, avgEnjoy:0};
-  let scoreSum=0, enjoySum=0;
-  for(const e of experiments){ stats.totalHours += Number(e.hours||0); scoreSum += Number(e.score||0); enjoySum += Number(e.enjoyment||0); }
-  stats.avgScore = experiments.length? (scoreSum/experiments.length).toFixed(2):"-";
-  stats.avgEnjoy = experiments.length? (enjoySum/experiments.length).toFixed(2):"-";
-  document.getElementById('stats').innerHTML = '<div class="stat">Count: ' + stats.count + '</div><div class="stat">Hours: ' + stats.totalHours.toFixed(1) + '</div><div class="stat">Avg score: ' + stats.avgScore + '</div>';
+function groupByType(items){ const map = new Map(); for(const it of items){ const t = it.type||'unknown'; if(!map.has(t)) map.set(t,[]); map.get(t).push(it); } return map; }
+
+function statsForGroup(arr){ const count = arr.length; const totalHours = arr.reduce((s,x)=>s+(Number(x.hours)||0),0); const avgScore = count? (arr.reduce((s,x)=>s+(Number(x.score)||0),0)/count):0; const avgEnjoy = count? (arr.reduce((s,x)=>s+(Number(x.enjoyment)||0),0)/count):0; return {count,totalHours,avgScore,avgEnjoy}; }
+
+function computeSuggestion(groupStats){ // prefer types with high avgEnjoy but lower exposure
+  const scores = Array.from(groupStats.entries()).map(([type,st])=>({type,score:st.avgEnjoy - (st.count/10)}));
+  scores.sort((a,b)=>b.score - a.score);
+  return scores.length? scores[0].type : null;
 }
 
-function renderCards() {
-  const container = document.getElementById('cards');
-  container.innerHTML = '';
-  const filter = document.getElementById('typeFilter').value;
-  const list = experiments.filter(e => !filter || e.type === filter);
-  for(const e of list){
-    const div = document.createElement('div'); div.className='card';
-    div.innerHTML = '<h2>' + escapeHtml(e.title) + '</h2><div class="meta">' + escapeHtml(e.type) + ' • ' + escapeHtml(e.date) + '</div>' +
-      '<div class="fields">' +
-      '<label>Score<input type="number" step="1" id="score-' + e.id + '" value="' + (Number(e.score)||0) + '"></label>' +
-      '<label>Hours<input type="number" step="0.1" id="hours-' + e.id + '" value="' + (Number(e.hours)||0) + '"></label>' +
-      '<label>Enjoy<input type="number" min="1" max="5" id="enjoy-' + e.id + '" value="' + (Number(e.enjoyment)||0) + '"></label>' +
-      '<label>Level<input type="number" min="1" max="3" id="level-' + e.id + '" value="' + (Number(e.level)||0) + '"></label>' +
-      '<label style="align-items:center"><input type="checkbox" id="repeat-' + e.id + '" ' + (e.wouldRepeat? 'checked':'') + ' style="margin-right:6px">Would Repeat</label>' +
-      '</div>' +
-      '<div class="lesson">' + escapeHtml(e.lesson||'') + '</div>' +
-      '<div class="save"><button class="save-btn" data-id="' + e.id + '">Save</button></div>';
-    container.appendChild(div);
+function renderMiniDashboard(groupStats){ const el = document.getElementById('miniDashboard'); el.innerHTML=''; for(const [type,st] of groupStats.entries()){ const d = document.createElement('div'); d.className='mini-card'; d.innerHTML = `<h3>${escapeHtml(type)}</h3><p>Avg Enjoy: ${st.avgEnjoy.toFixed(2)} • Avg Score: ${st.avgScore.toFixed(2)}</p>`; el.appendChild(d); } const suggestion = computeSuggestion(groupStats); if(suggestion){ const s = document.createElement('div'); s.className='mini-card'; s.innerHTML=`<h3>Suggested</h3><p>Try: <strong>${escapeHtml(suggestion)}</strong></p>`; el.insertBefore(s, el.firstChild); } }
+
+function renderGroups(filteredTypes, repeatOnly, sortKey){ const groups = groupByType(experiments); const groupStats = new Map(); for(const [type,arr] of groups.entries()) groupStats.set(type, statsForGroup(arr));
+  renderMiniDashboard(groupStats);
+  // prepare ordering
+  let entries = Array.from(groups.entries()).filter(([t])=> !filteredTypes.size || filteredTypes.has(t));
+  // apply repeatOnly filter
+  if(repeatOnly) entries = entries.map(([t,arr])=>[t,arr.filter(x=>x.wouldRepeat)]).filter(([t,arr])=>arr.length>0);
+  // compute stats for ordering
+  entries = entries.map(([t,arr])=>[t,arr,statsForGroup(arr)]);
+  // sort
+  entries.sort((a,b)=>{
+    const aSt = a[2], bSt = b[2];
+    if(sortKey==='score') return bSt.avgScore - aSt.avgScore;
+    if(sortKey==='enjoyment') return bSt.avgEnjoy - aSt.avgEnjoy;
+    if(sortKey==='hours') return bSt.totalHours - aSt.totalHours;
+    // default date: newest first by max date in group
+    const ad = Math.max(...a[1].map(x=>new Date(x.date).getTime()));
+    const bd = Math.max(...b[1].map(x=>new Date(x.date).getTime()));
+    return bd - ad;
+  });
+
+  const container = document.getElementById('groups'); container.innerHTML='';
+  for(const [type,arr,st] of entries){
+    const g = document.createElement('div'); g.className='group-row';
+    const header = document.createElement('div'); header.className='row-title'; header.innerHTML = `<div>${escapeHtml(type)} (${st.count})</div><div style="font-size:12px;color:var(--muted)">AvgE:${st.avgEnjoy.toFixed(2)} • AvgS:${st.avgScore.toFixed(2)}</div>`;
+    const row = document.createElement('div'); row.className='row-scroll';
+    // sort items in row by date desc
+    arr.sort((a,b)=> new Date(b.date)-new Date(a.date));
+    for(const e of arr){ const card = document.createElement('div'); card.className='card'; card.innerHTML = `<h4>${escapeHtml(e.title)}</h4><div class="meta">${escapeHtml(e.date)}</div><div class="fields">`+
+        `<label>Score<input type="number" step="1" id="score-${e.id}" value="${Number(e.score)||0}"></label>`+
+        `<label>Hours<input type="number" step="0.1" id="hours-${e.id}" value="${Number(e.hours)||0}"></label>`+
+        `<label>Enjoy<input type="number" min="1" max="5" id="enjoy-${e.id}" value="${Number(e.enjoyment)||0}"></label>`+
+        `</div><div class="lesson">${escapeHtml(e.lesson||'')}</div><div class="save"><button class="save-btn" data-id="${e.id}">Save</button></div>`;
+      row.appendChild(card);
+    }
+    g.appendChild(header); g.appendChild(row); container.appendChild(g);
   }
   // attach save handlers
   container.querySelectorAll('button[data-id]').forEach(btn=>{
@@ -153,17 +165,13 @@ function renderCards() {
         score: Number(document.getElementById('score-' + id).value||0),
         hours: Number(document.getElementById('hours-' + id).value||0),
         enjoyment: Number(document.getElementById('enjoy-' + id).value||0),
-        level: Number(document.getElementById('level-' + id).value||0),
-        wouldRepeat: document.getElementById('repeat-' + id).checked
+        level: Number(document.getElementById('level-' + id)?.value||0),
+        wouldRepeat: document.getElementById('repeat-' + id)?.checked || false
       };
-      btn.disabled = true; btn.textContent='Saving...';
-      try{
-        await fetchJson('/api/experiments/' + encodeURIComponent(id), { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(patch) });
-        hideError();
-        await loadAndRender();
-      }catch(err){
-        // error already shown by fetchJson
-      }finally{btn.disabled=false;btn.textContent='Save'}
+      btn.disabled=true; btn.textContent='Saving...';
+      try{ await fetchJson('/api/experiments/' + encodeURIComponent(id), { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(patch) }); hideError(); await loadAndRender(); }
+      catch(err){ /* banner shown by fetchJson */ }
+      finally{ btn.disabled=false; btn.textContent='Save'; }
     });
   });
 }
@@ -171,30 +179,27 @@ function renderCards() {
 function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function loadAndRender(){
-  try{
-    experiments = await fetchJson('/api/experiments');
-  }catch(err){
-    // fetchJson already shows banner; stop further rendering
-    return;
-  }
-  // populate types
-  types = new Set(experiments.map(e=>e.type).filter(Boolean));
-  const sel = document.getElementById('typeFilter');
-  const current = sel.value;
-  sel.innerHTML = '<option value="">(all)</option>';
-  [...types].sort().forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); });
-  if(current) sel.value=current;
-  renderStats();
-  renderCards();
+  try{ experiments = await fetchJson('/api/experiments'); } catch(err){ return; }
+  // build type filter options
+  const types = Array.from(new Set(experiments.map(e=>e.type).filter(Boolean))).sort();
+  const sel = document.getElementById('typeFilter'); const cur = sel.value; sel.innerHTML = '<option value="">(all)</option>'; types.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o); }); if(cur) sel.value=cur;
+  // controls
+  const repeatOnly = document.getElementById('repeatOnly').checked;
+  const sortKey = document.getElementById('sortSelect').value;
+  const filteredTypes = new Set(); if(document.getElementById('typeFilter').value) filteredTypes.add(document.getElementById('typeFilter').value);
+  renderGroups(filteredTypes, repeatOnly, sortKey);
 }
 
-document.getElementById('typeFilter').addEventListener('change', ()=>{ renderCards(); });
+document.getElementById('typeFilter').addEventListener('change', ()=>loadAndRender());
+document.getElementById('repeatOnly').addEventListener('change', ()=>loadAndRender());
+document.getElementById('sortSelect').addEventListener('change', ()=>loadAndRender());
 
-loadAndRender(); 
+loadAndRender();
 </script>
 </body>
 </html>`;
 }
+
 
 async function startServer(instanceId) {
     const server = createServer(async (req, res) => {
