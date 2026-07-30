@@ -1,0 +1,239 @@
+{
+  "endpoint": "http://127.0.0.1:5050/mcp",
+  "protocol_version": "2026-07-28",
+  "events": [
+    {
+      "step": "tools_list",
+      "arguments": null,
+      "result": {
+        "tools": [
+          "add_work_item",
+          "complete_work_item",
+          "create_workspace",
+          "list_work_items"
+        ]
+      }
+    },
+    {
+      "step": "create_workspace",
+      "arguments": {
+        "name": "SDK Client Evidence"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\u0022workspace_id\u0022:\u0022ws_ff69aa1621244db1a04796ba7595c179\u0022,\u0022name\u0022:\u0022SDK Client Evidence\u0022}"
+          }
+        ],
+        "structuredContent": {
+          "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+          "name": "SDK Client Evidence"
+        },
+        "isError": null,
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "StatelessWorkspaceMcp",
+            "version": "1.0.0.0"
+          }
+        },
+        "resultType": "complete"
+      }
+    },
+    {
+      "step": "add_work_item_first",
+      "arguments": {
+        "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+        "title": "\u5B8C\u6210 MCP Client \u6E2C\u8A66"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\u0022workspace_id\u0022:\u0022ws_ff69aa1621244db1a04796ba7595c179\u0022,\u0022work_item_id\u0022:\u0022wi_00aa30f2bfd849a88b6a4bf46981d737\u0022,\u0022title\u0022:\u0022\\u5B8C\\u6210 MCP Client \\u6E2C\\u8A66\u0022,\u0022is_completed\u0022:false,\u0022completed_at\u0022:null}"
+          }
+        ],
+        "structuredContent": {
+          "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+          "work_item_id": "wi_00aa30f2bfd849a88b6a4bf46981d737",
+          "title": "\u5B8C\u6210 MCP Client \u6E2C\u8A66",
+          "is_completed": false,
+          "completed_at": null
+        },
+        "isError": null,
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "StatelessWorkspaceMcp",
+            "version": "1.0.0.0"
+          }
+        },
+        "resultType": "complete"
+      }
+    },
+    {
+      "step": "add_work_item_second",
+      "arguments": {
+        "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+        "title": "\u6574\u7406 Client \u8B49\u64DA"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\u0022workspace_id\u0022:\u0022ws_ff69aa1621244db1a04796ba7595c179\u0022,\u0022work_item_id\u0022:\u0022wi_46123891781d43caa8f21a9c2aef1368\u0022,\u0022title\u0022:\u0022\\u6574\\u7406 Client \\u8B49\\u64DA\u0022,\u0022is_completed\u0022:false,\u0022completed_at\u0022:null}"
+          }
+        ],
+        "structuredContent": {
+          "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+          "work_item_id": "wi_46123891781d43caa8f21a9c2aef1368",
+          "title": "\u6574\u7406 Client \u8B49\u64DA",
+          "is_completed": false,
+          "completed_at": null
+        },
+        "isError": null,
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "StatelessWorkspaceMcp",
+            "version": "1.0.0.0"
+          }
+        },
+        "resultType": "complete"
+      }
+    },
+    {
+      "step": "list_before_complete",
+      "arguments": {
+        "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\u0022workspace_id\u0022:\u0022ws_ff69aa1621244db1a04796ba7595c179\u0022,\u0022items\u0022:[{\u0022work_item_id\u0022:\u0022wi_00aa30f2bfd849a88b6a4bf46981d737\u0022,\u0022title\u0022:\u0022\\u5B8C\\u6210 MCP Client \\u6E2C\\u8A66\u0022,\u0022is_completed\u0022:false,\u0022completed_at\u0022:null},{\u0022work_item_id\u0022:\u0022wi_46123891781d43caa8f21a9c2aef1368\u0022,\u0022title\u0022:\u0022\\u6574\\u7406 Client \\u8B49\\u64DA\u0022,\u0022is_completed\u0022:false,\u0022completed_at\u0022:null}]}"
+          }
+        ],
+        "structuredContent": {
+          "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+          "items": [
+            {
+              "work_item_id": "wi_00aa30f2bfd849a88b6a4bf46981d737",
+              "title": "\u5B8C\u6210 MCP Client \u6E2C\u8A66",
+              "is_completed": false,
+              "completed_at": null
+            },
+            {
+              "work_item_id": "wi_46123891781d43caa8f21a9c2aef1368",
+              "title": "\u6574\u7406 Client \u8B49\u64DA",
+              "is_completed": false,
+              "completed_at": null
+            }
+          ]
+        },
+        "isError": null,
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "StatelessWorkspaceMcp",
+            "version": "1.0.0.0"
+          }
+        },
+        "resultType": "complete"
+      }
+    },
+    {
+      "step": "complete_work_item",
+      "arguments": {
+        "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+        "work_item_id": "wi_00aa30f2bfd849a88b6a4bf46981d737"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\u0022workspace_id\u0022:\u0022ws_ff69aa1621244db1a04796ba7595c179\u0022,\u0022work_item_id\u0022:\u0022wi_00aa30f2bfd849a88b6a4bf46981d737\u0022,\u0022title\u0022:\u0022\\u5B8C\\u6210 MCP Client \\u6E2C\\u8A66\u0022,\u0022is_completed\u0022:true,\u0022completed_at\u0022:\u00222026-07-30T14:56:43.671321\u002B00:00\u0022}"
+          }
+        ],
+        "structuredContent": {
+          "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+          "work_item_id": "wi_00aa30f2bfd849a88b6a4bf46981d737",
+          "title": "\u5B8C\u6210 MCP Client \u6E2C\u8A66",
+          "is_completed": true,
+          "completed_at": "2026-07-30T14:56:43.671321\u002B00:00"
+        },
+        "isError": null,
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "StatelessWorkspaceMcp",
+            "version": "1.0.0.0"
+          }
+        },
+        "resultType": "complete"
+      }
+    },
+    {
+      "step": "list_after_complete",
+      "arguments": {
+        "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\u0022workspace_id\u0022:\u0022ws_ff69aa1621244db1a04796ba7595c179\u0022,\u0022items\u0022:[{\u0022work_item_id\u0022:\u0022wi_00aa30f2bfd849a88b6a4bf46981d737\u0022,\u0022title\u0022:\u0022\\u5B8C\\u6210 MCP Client \\u6E2C\\u8A66\u0022,\u0022is_completed\u0022:true,\u0022completed_at\u0022:\u00222026-07-30T14:56:43.671321\u002B00:00\u0022},{\u0022work_item_id\u0022:\u0022wi_46123891781d43caa8f21a9c2aef1368\u0022,\u0022title\u0022:\u0022\\u6574\\u7406 Client \\u8B49\\u64DA\u0022,\u0022is_completed\u0022:false,\u0022completed_at\u0022:null}]}"
+          }
+        ],
+        "structuredContent": {
+          "workspace_id": "ws_ff69aa1621244db1a04796ba7595c179",
+          "items": [
+            {
+              "work_item_id": "wi_00aa30f2bfd849a88b6a4bf46981d737",
+              "title": "\u5B8C\u6210 MCP Client \u6E2C\u8A66",
+              "is_completed": true,
+              "completed_at": "2026-07-30T14:56:43.671321\u002B00:00"
+            },
+            {
+              "work_item_id": "wi_46123891781d43caa8f21a9c2aef1368",
+              "title": "\u6574\u7406 Client \u8B49\u64DA",
+              "is_completed": false,
+              "completed_at": null
+            }
+          ]
+        },
+        "isError": null,
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "StatelessWorkspaceMcp",
+            "version": "1.0.0.0"
+          }
+        },
+        "resultType": "complete"
+      }
+    },
+    {
+      "step": "invalid_workspace",
+      "arguments": {
+        "workspace_id": "ws_does_not_exist",
+        "title": "Must be rejected"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\u0022code\u0022:\u0022workspace_not_found\u0022,\u0022message\u0022:\u0022Workspace \\u0027ws_does_not_exist\\u0027 does not exist.\u0022}"
+          }
+        ],
+        "structuredContent": {
+          "code": "workspace_not_found",
+          "message": "Workspace \u0027ws_does_not_exist\u0027 does not exist."
+        },
+        "isError": true,
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "StatelessWorkspaceMcp",
+            "version": "1.0.0.0"
+          }
+        },
+        "resultType": "complete"
+      }
+    }
+  ]
+}
