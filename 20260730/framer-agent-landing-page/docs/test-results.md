@@ -13,5 +13,16 @@ prompt-staged-build
 4. 折線圖 ： 線中間有斷點
 
 
-revision-prompt.md
-1. 因為credit用完了，所以無法驗證到
+
+## Revision Test
+
+因 Framer AI Credits 已耗盡，未再次呼叫 Agent。
+本次改由人工在 Framer Canvas 定點修正：
+
+1. 統一已完成挑戰卡片高度：通過／未通過
+2. 修正圖片與挑戰資料對應：通過／未通過
+3. 檢查 Section 順序、配色、Hero 文字是否未被改動：通過／未通過
+
+證據：
+- before-revision.png
+- after-revision.png
