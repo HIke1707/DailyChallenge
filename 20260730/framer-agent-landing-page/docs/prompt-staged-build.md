@@ -1,4 +1,4 @@
-# Revision Prompt
+# Staged Build Prompt
 
 ## 階段一：頁面結構與版面配置
 
