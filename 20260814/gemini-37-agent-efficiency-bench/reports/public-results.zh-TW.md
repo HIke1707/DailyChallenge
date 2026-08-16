@@ -7,6 +7,8 @@
 
 Gemini 3.7 Flash High 與 GPT-5.6 Luna xhigh 都通過 5/6 組驗收。兩者在六組測試的最終功能驗證均為 6/6，沒有高風險失敗、逾時或循環失控。
 
+`5/6` 是預先註冊的完整 task Gate；`6/6` 是最終功能與最終驗證 Gate。兩者的 TASK-006 都修正了最終功能，但都沒有在修正前觀察到指定 reproduction command 的失敗，因此仍依預先規則計為 task FAIL，而非事後補分。
+
 Gemini 3.7 Flash High 達到本次最低採用門檻，可作為規格清楚、低風險且具確定性驗證條件之任務的候選模型。不過，GPT-5.6 Luna xhigh 在本次測試中平均約快 3.93 倍，工具呼叫也明顯較少，因此現階段仍適合作為日常效率基準。
 
 ## 結果矩陣
@@ -47,3 +49,9 @@ Gemini 3.7 Flash High 達到本次最低採用門檻，可作為規格清楚、�
 - 公開檔案不含題目內容、prompt、fixture、程式碼、評分器、模型逐步過程或原始輸出。
 - 公開檔案不含模型工作目錄、內嵌 Git metadata、本機絕對路徑、Email 或作者身分。
 - 憑證特徵掃描未發現 API key、access token、密碼、Bearer token 或私鑰。
+
+## 可稽核證據
+
+- [去識別化 audit bundle](../audit/public-audit.json)：12 次 run 的公開 manifest 欄位、起訖 source-tree 指紋、prompt／測試／diff／raw log／event 雜湊、Gate 結果與失敗原因。
+- [方法與限制](../audit/methodology.md)：雜湊重算方式、公平性範圍與不可比較的指標。
+- [Routing policy](../audit/routing-policy.md)：採用、升級與人工介入規則。

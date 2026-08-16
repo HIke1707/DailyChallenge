@@ -4,3 +4,8 @@
 !reports/
 reports/*
 !reports/public-results.zh-TW.md
+!audit/
+audit/*
+!audit/public-audit.json
+!audit/methodology.md
+!audit/routing-policy.md
