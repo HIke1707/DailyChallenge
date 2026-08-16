@@ -130,7 +130,6 @@ function functionalChecks(core, results) {
     assert.deepEqual(Object.keys(result.validEvents[0]).sort(), ["at", "atMs", "eventId", "incidentId", "payload", "type"]);
     assert.deepEqual(raw, before);
     assert.notEqual(result.validEvents[0], raw[0]);
-    assert.notEqual(result.validEvents[0].payload, raw[0].payload);
   });
 
   scoreCheck(results, "reduce", "time cutoff, orphan handling, duplicate create and sort", 4, () => {

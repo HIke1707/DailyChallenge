@@ -61,7 +61,7 @@ for (const name of ["model-a", "model-b"]) {
 
 const payload = {
   schemaVersion: 1,
-  rubricVersion: "2026-08-14.1",
+  rubricVersion: "2026-08-14.2",
   generatedAt: new Date().toISOString(),
   submissions,
 };

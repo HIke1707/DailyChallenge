@@ -1,46 +1,110 @@
 # Incident Replay Workbench｜雙模型比較報告
 
-產生時間：2026-08-16T07:43:45.583Z
+產生時間：2026-08-16T09:47:24.831Z
 
 ## 結論
 
-兩份提交尚未都完成，暫不比較勝負。 
+最終勝出：**model-a**（判定：total_score）。
 
 ## 分數總覽
 
 | 項目 | model-a | model-b |
 |---|---:|---:|
-| 核心正確性 | pending / 50 | pending / 50 |
-| 提交與產品接線 | pending / 15 | pending / 15 |
-| 自動小計 | pending / 65 | pending / 65 |
-| 瀏覽器走查 | pending / 35 | pending / 35 |
-| **總分** | **pending / 100** | **pending / 100** |
+| 核心正確性 | 44 / 50 | 42 / 50 |
+| 提交與產品接線 | 15 / 15 | 15 / 15 |
+| 自動小計 | 59 / 65 | 57 / 65 |
+| 瀏覽器走查 | 30 / 35 | 31.5 / 35 |
+| **總分** | **89 / 100** | **88.5 / 100** |
 
 ## 瀏覽器走查明細
 
 | 面向 | model-a | model-b |
 |---|---:|---:|
-| visualHierarchy | pending / 10 | pending / 10 |
-| interactions | pending / 10 | pending / 10 |
-| responsive | pending / 5 | pending / 5 |
-| accessibility | pending / 5 | pending / 5 |
-| resilience | pending / 5 | pending / 5 |
+| visualHierarchy | 9.5 / 10 | 9 / 10 |
+| interactions | 7.5 / 10 | 9.5 / 10 |
+| responsive | 4.5 / 5 | 4.5 / 5 |
+| accessibility | 4 / 5 | 4 / 5 |
+| resilience | 4.5 / 5 | 4.5 / 5 |
 
 ## model-a 自動檢查失敗
 
-- 尚未提交。
+- shape, timestamp and validation precedence（0/4）：AssertionError: Expected values to be strictly deep-equal:
++ actual - expected ... Lines skipped
+
+  [
+    {
+...
+      eventId: 'bad-local',
+      index: 2,
+-     reason: 'invalid_timestamp'
+-   },
+-   {
+-     eventId: 'bad-date',
+-     index: 3,
+      reason: 'invalid_timestamp'
+    }
+  ]
+- empty filters preserve order and input（0/2）：AssertionError: Expected values to be strictly deep-equal:
++ actual - expected
+
++ []
+- [
+-   {
+-     incidentId: 'Z'
+-   },
+-   {
+-     incidentId: 'A'
+-   }
+- ]
 
 ## model-b 自動檢查失敗
 
-- 尚未提交。
+- shape, timestamp and validation precedence（0/4）：AssertionError: Expected values to be strictly deep-equal:
++ actual - expected ... Lines skipped
+
+  [
+    {
+...
+      eventId: 'bad-local',
+      index: 2,
+-     reason: 'invalid_timestamp'
+-   },
+-   {
+-     eventId: 'bad-date',
+-     index: 3,
+      reason: 'invalid_timestamp'
+    }
+  ]
+- supported event types and payload validation（0/4）：AssertionError: Expected values to be strictly deep-equal:
++ actual - expected ... Lines skipped
+
+  [
+-   'invalid_payload',
+    'invalid_payload',
+...
+    'invalid_payload',
+    'unsupported_type'
+  ]
 
 ## model-a 走查觀察
 
-- 尚無人工走查紀錄。
+- 1440px 桌面版的視覺層級、狀態色彩、KPI 掃讀性與品牌一致性非常完整；390px 版維持雙欄 KPI 並正確轉成單欄工作區。
+- 1440 與 390 實測 document scrollWidth 均等於 innerWidth，沒有水平溢出；390px 完整頁面高度約 3262px，篩選 checkbox 單欄排列使頁面偏長。
+- SEV-1 + SEV-2 與 Open 的 AND／OR 組合正確得到 INC-2405、INC-2410；選取事故、篩掉事故、上一頁還原 selected 均通過。
+- 播放每 tick 前進 15 分鐘，但到達 max 後計時器雖停止，按鈕與 aria-label 仍停留在 Pause；從 Live 開始播放時 URL 也要等第一個 tick 才同步到最早時間。
+- 事故列表實際依 incident ID 排序，但畫面標示 Updated latest first，文案與結果不一致。
+- 鍵盤 Enter 可選事故、slider ArrowLeft 可即時更新、focus outline 清楚；搜尋欄在 accessibility tree 的名稱只有「/」，缺少明確 Search incidents 名稱。
+- Data Quality details 可展開並顯示 7 筆拒絕事件，loading／error／empty state 均有實作，完整操作後 Console 無 warning 或 error。
 
 ## model-b 走查觀察
 
-- 尚無人工走查紀錄。
+- 1440px 桌面版資訊密度控制良好，KPI、回放、篩選與雙欄工作區能在首屏建立清楚的操作順序；視覺語言一致但品牌辨識度略低於 A。
+- 390×844 實測 document scrollWidth 與 body scrollWidth 都是 390，沒有水平溢出；完整頁面高度約 2531px，filter pills 比 A 更節省垂直空間。
+- SEV-1 + SEV-2 與 Open 的 AND／OR 組合、事故選取失效、上一頁 selected 還原、搜尋、slider 鍵盤操作均正確。
+- 播放到最後事件會自動回到 Play 狀態，URL 同步正確，並額外提供 ±15m 控制；預設 Live／空篩選會省略空 query key，但重新整理與上一頁還原仍通過。
+- Data Quality modal 在桌面與 390px 都無溢出，顯示 55／48／7 與 7 筆拒絕明細，Escape 可關閉。
+- modal 開啟後 document.activeElement 仍是背景的 btn-data-health，沒有把 focus 移入 dialog、focus trap 或關閉後的明確 focus restoration；因此 accessibility 未給滿分。
+- 390px 的 ±15m 按鈕高度約 38px，低於 README 宣稱的所有觸控目標大於 44px；完整操作後 Console 無 warning 或 error。
 
 ## 判讀提醒
 

@@ -1,86 +1,562 @@
 {
   "schemaVersion": 1,
-  "rubricVersion": "2026-08-14.1",
-  "generatedAt": "2026-08-16T07:43:45.583Z",
+  "rubricVersion": "2026-08-14.2",
+  "generatedAt": "2026-08-16T09:47:24.831Z",
   "submissions": {
     "model-a": {
-      "status": "not_submitted",
-      "automated": null,
-      "manual": {
-        "status": "pending",
-        "score": null,
-        "max": 35,
-        "dimensions": {
-          "visualHierarchy": {
-            "score": null,
-            "max": 10
+      "status": "graded",
+      "automated": {
+        "score": 59,
+        "max": 65,
+        "categories": {
+          "core_correctness": {
+            "score": 44,
+            "max": 50
           },
-          "interactions": {
-            "score": null,
-            "max": 10
+          "product_readiness": {
+            "score": 15,
+            "max": 15
+          }
+        },
+        "detailCategories": {
+          "core": {
+            "score": 2,
+            "max": 2
           },
-          "responsive": {
-            "score": null,
+          "normalize": {
+            "score": 11,
+            "max": 15
+          },
+          "reduce": {
+            "score": 15,
+            "max": 15
+          },
+          "filters": {
+            "score": 4,
+            "max": 6
+          },
+          "metrics": {
+            "score": 7,
+            "max": 7
+          },
+          "build": {
+            "score": 5,
             "max": 5
           },
-          "accessibility": {
-            "score": null,
+          "integrity": {
+            "score": 5,
             "max": 5
           },
-          "resilience": {
-            "score": null,
+          "wiring": {
+            "score": 5,
+            "max": 5
+          },
+          "readiness": {
+            "score": 5,
             "max": 5
           }
         },
-        "notes": []
+        "checks": [
+          {
+            "category": "core",
+            "name": "required ESM exports",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "normalize",
+            "name": "shape, timestamp and validation precedence",
+            "points": 4,
+            "earned": 0,
+            "passed": false,
+            "detail": "AssertionError: Expected values to be strictly deep-equal:\n+ actual - expected ... Lines skipped\n\n  [\n    {\n...\n      eventId: 'bad-local',\n      index: 2,\n-     reason: 'invalid_timestamp'\n-   },\n-   {\n-     eventId: 'bad-date',\n-     index: 3,\n      reason: 'invalid_timestamp'\n    }\n  ]"
+          },
+          {
+            "category": "normalize",
+            "name": "supported event types and payload validation",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "normalize",
+            "name": "duplicate ownership and deterministic ordering",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "normalize",
+            "name": "canonical output and input immutability",
+            "points": 3,
+            "earned": 3,
+            "passed": true
+          },
+          {
+            "category": "reduce",
+            "name": "time cutoff, orphan handling, duplicate create and sort",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "reduce",
+            "name": "acknowledge, resolve and reopen lifecycle",
+            "points": 5,
+            "earned": 5,
+            "passed": true
+          },
+          {
+            "category": "reduce",
+            "name": "owner, severity, notes and canonical state",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "reduce",
+            "name": "default Infinity and input immutability",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "filters",
+            "name": "case-insensitive search and AND/OR semantics",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "filters",
+            "name": "empty filters preserve order and input",
+            "points": 2,
+            "earned": 0,
+            "passed": false,
+            "detail": "AssertionError: Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   {\n-     incidentId: 'Z'\n-   },\n-   {\n-     incidentId: 'A'\n-   }\n- ]"
+          },
+          {
+            "category": "metrics",
+            "name": "active, acknowledgement, MTTR and tie break",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "metrics",
+            "name": "empty data and invalid MTTR interval",
+            "points": 3,
+            "earned": 3,
+            "passed": true
+          },
+          {
+            "category": "build",
+            "name": "pipeline rejects bad data and scores filtered slice",
+            "points": 5,
+            "earned": 5,
+            "passed": true
+          },
+          {
+            "category": "integrity",
+            "name": "required files exist",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          },
+          {
+            "category": "integrity",
+            "name": "package has no external dependencies",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          },
+          {
+            "category": "integrity",
+            "name": "provided dataset is unchanged",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "integrity",
+            "name": "public tests are unchanged",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          },
+          {
+            "category": "wiring",
+            "name": "loads fixture and uses core pipeline",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "wiring",
+            "name": "URL query and browser history restoration",
+            "points": 1.5,
+            "earned": 1.5,
+            "passed": true
+          },
+          {
+            "category": "wiring",
+            "name": "range replay and timed playback are wired",
+            "points": 1.5,
+            "earned": 1.5,
+            "passed": true
+          },
+          {
+            "category": "readiness",
+            "name": "controls expose accessible naming",
+            "points": 1.5,
+            "earned": 1.5,
+            "passed": true
+          },
+          {
+            "category": "readiness",
+            "name": "responsive and reduced-motion CSS",
+            "points": 1.5,
+            "earned": 1.5,
+            "passed": true
+          },
+          {
+            "category": "readiness",
+            "name": "visible focus and flexible layout signals",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          },
+          {
+            "category": "readiness",
+            "name": "README records decisions, tests and limitations",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          }
+        ]
+      },
+      "manual": {
+        "status": "complete",
+        "score": 30,
+        "max": 35,
+        "dimensions": {
+          "visualHierarchy": {
+            "score": 9.5,
+            "max": 10
+          },
+          "interactions": {
+            "score": 7.5,
+            "max": 10
+          },
+          "responsive": {
+            "score": 4.5,
+            "max": 5
+          },
+          "accessibility": {
+            "score": 4,
+            "max": 5
+          },
+          "resilience": {
+            "score": 4.5,
+            "max": 5
+          }
+        },
+        "notes": [
+          "1440px 桌面版的視覺層級、狀態色彩、KPI 掃讀性與品牌一致性非常完整；390px 版維持雙欄 KPI 並正確轉成單欄工作區。",
+          "1440 與 390 實測 document scrollWidth 均等於 innerWidth，沒有水平溢出；390px 完整頁面高度約 3262px，篩選 checkbox 單欄排列使頁面偏長。",
+          "SEV-1 + SEV-2 與 Open 的 AND／OR 組合正確得到 INC-2405、INC-2410；選取事故、篩掉事故、上一頁還原 selected 均通過。",
+          "播放每 tick 前進 15 分鐘，但到達 max 後計時器雖停止，按鈕與 aria-label 仍停留在 Pause；從 Live 開始播放時 URL 也要等第一個 tick 才同步到最早時間。",
+          "事故列表實際依 incident ID 排序，但畫面標示 Updated latest first，文案與結果不一致。",
+          "鍵盤 Enter 可選事故、slider ArrowLeft 可即時更新、focus outline 清楚；搜尋欄在 accessibility tree 的名稱只有「/」，缺少明確 Search incidents 名稱。",
+          "Data Quality details 可展開並顯示 7 筆拒絕事件，loading／error／empty state 均有實作，完整操作後 Console 無 warning 或 error。"
+        ]
       },
       "total": {
-        "status": "pending",
-        "score": null,
+        "status": "complete",
+        "score": 89,
         "max": 100
       }
     },
     "model-b": {
-      "status": "not_submitted",
-      "automated": null,
-      "manual": {
-        "status": "pending",
-        "score": null,
-        "max": 35,
-        "dimensions": {
-          "visualHierarchy": {
-            "score": null,
-            "max": 10
+      "status": "graded",
+      "automated": {
+        "score": 57,
+        "max": 65,
+        "categories": {
+          "core_correctness": {
+            "score": 42,
+            "max": 50
           },
-          "interactions": {
-            "score": null,
-            "max": 10
+          "product_readiness": {
+            "score": 15,
+            "max": 15
+          }
+        },
+        "detailCategories": {
+          "core": {
+            "score": 2,
+            "max": 2
           },
-          "responsive": {
-            "score": null,
+          "normalize": {
+            "score": 7,
+            "max": 15
+          },
+          "reduce": {
+            "score": 15,
+            "max": 15
+          },
+          "filters": {
+            "score": 6,
+            "max": 6
+          },
+          "metrics": {
+            "score": 7,
+            "max": 7
+          },
+          "build": {
+            "score": 5,
             "max": 5
           },
-          "accessibility": {
-            "score": null,
+          "integrity": {
+            "score": 5,
             "max": 5
           },
-          "resilience": {
-            "score": null,
+          "wiring": {
+            "score": 5,
+            "max": 5
+          },
+          "readiness": {
+            "score": 5,
             "max": 5
           }
         },
-        "notes": []
+        "checks": [
+          {
+            "category": "core",
+            "name": "required ESM exports",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "normalize",
+            "name": "shape, timestamp and validation precedence",
+            "points": 4,
+            "earned": 0,
+            "passed": false,
+            "detail": "AssertionError: Expected values to be strictly deep-equal:\n+ actual - expected ... Lines skipped\n\n  [\n    {\n...\n      eventId: 'bad-local',\n      index: 2,\n-     reason: 'invalid_timestamp'\n-   },\n-   {\n-     eventId: 'bad-date',\n-     index: 3,\n      reason: 'invalid_timestamp'\n    }\n  ]"
+          },
+          {
+            "category": "normalize",
+            "name": "supported event types and payload validation",
+            "points": 4,
+            "earned": 0,
+            "passed": false,
+            "detail": "AssertionError: Expected values to be strictly deep-equal:\n+ actual - expected ... Lines skipped\n\n  [\n-   'invalid_payload',\n    'invalid_payload',\n...\n    'invalid_payload',\n    'unsupported_type'\n  ]"
+          },
+          {
+            "category": "normalize",
+            "name": "duplicate ownership and deterministic ordering",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "normalize",
+            "name": "canonical output and input immutability",
+            "points": 3,
+            "earned": 3,
+            "passed": true
+          },
+          {
+            "category": "reduce",
+            "name": "time cutoff, orphan handling, duplicate create and sort",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "reduce",
+            "name": "acknowledge, resolve and reopen lifecycle",
+            "points": 5,
+            "earned": 5,
+            "passed": true
+          },
+          {
+            "category": "reduce",
+            "name": "owner, severity, notes and canonical state",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "reduce",
+            "name": "default Infinity and input immutability",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "filters",
+            "name": "case-insensitive search and AND/OR semantics",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "filters",
+            "name": "empty filters preserve order and input",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "metrics",
+            "name": "active, acknowledgement, MTTR and tie break",
+            "points": 4,
+            "earned": 4,
+            "passed": true
+          },
+          {
+            "category": "metrics",
+            "name": "empty data and invalid MTTR interval",
+            "points": 3,
+            "earned": 3,
+            "passed": true
+          },
+          {
+            "category": "build",
+            "name": "pipeline rejects bad data and scores filtered slice",
+            "points": 5,
+            "earned": 5,
+            "passed": true
+          },
+          {
+            "category": "integrity",
+            "name": "required files exist",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          },
+          {
+            "category": "integrity",
+            "name": "package has no external dependencies",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          },
+          {
+            "category": "integrity",
+            "name": "provided dataset is unchanged",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "integrity",
+            "name": "public tests are unchanged",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          },
+          {
+            "category": "wiring",
+            "name": "loads fixture and uses core pipeline",
+            "points": 2,
+            "earned": 2,
+            "passed": true
+          },
+          {
+            "category": "wiring",
+            "name": "URL query and browser history restoration",
+            "points": 1.5,
+            "earned": 1.5,
+            "passed": true
+          },
+          {
+            "category": "wiring",
+            "name": "range replay and timed playback are wired",
+            "points": 1.5,
+            "earned": 1.5,
+            "passed": true
+          },
+          {
+            "category": "readiness",
+            "name": "controls expose accessible naming",
+            "points": 1.5,
+            "earned": 1.5,
+            "passed": true
+          },
+          {
+            "category": "readiness",
+            "name": "responsive and reduced-motion CSS",
+            "points": 1.5,
+            "earned": 1.5,
+            "passed": true
+          },
+          {
+            "category": "readiness",
+            "name": "visible focus and flexible layout signals",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          },
+          {
+            "category": "readiness",
+            "name": "README records decisions, tests and limitations",
+            "points": 1,
+            "earned": 1,
+            "passed": true
+          }
+        ]
+      },
+      "manual": {
+        "status": "complete",
+        "score": 31.5,
+        "max": 35,
+        "dimensions": {
+          "visualHierarchy": {
+            "score": 9,
+            "max": 10
+          },
+          "interactions": {
+            "score": 9.5,
+            "max": 10
+          },
+          "responsive": {
+            "score": 4.5,
+            "max": 5
+          },
+          "accessibility": {
+            "score": 4,
+            "max": 5
+          },
+          "resilience": {
+            "score": 4.5,
+            "max": 5
+          }
+        },
+        "notes": [
+          "1440px 桌面版資訊密度控制良好，KPI、回放、篩選與雙欄工作區能在首屏建立清楚的操作順序；視覺語言一致但品牌辨識度略低於 A。",
+          "390×844 實測 document scrollWidth 與 body scrollWidth 都是 390，沒有水平溢出；完整頁面高度約 2531px，filter pills 比 A 更節省垂直空間。",
+          "SEV-1 + SEV-2 與 Open 的 AND／OR 組合、事故選取失效、上一頁 selected 還原、搜尋、slider 鍵盤操作均正確。",
+          "播放到最後事件會自動回到 Play 狀態，URL 同步正確，並額外提供 ±15m 控制；預設 Live／空篩選會省略空 query key，但重新整理與上一頁還原仍通過。",
+          "Data Quality modal 在桌面與 390px 都無溢出，顯示 55／48／7 與 7 筆拒絕明細，Escape 可關閉。",
+          "modal 開啟後 document.activeElement 仍是背景的 btn-data-health，沒有把 focus 移入 dialog、focus trap 或關閉後的明確 focus restoration；因此 accessibility 未給滿分。",
+          "390px 的 ±15m 按鈕高度約 38px，低於 README 宣稱的所有觸控目標大於 44px；完整操作後 Console 無 warning 或 error。"
+        ]
       },
       "total": {
-        "status": "pending",
-        "score": null,
+        "status": "complete",
+        "score": 88.5,
         "max": 100
       }
     }
   },
   "comparison": {
-    "automatedLeader": null,
-    "finalWinner": null,
-    "reason": "manual_review_pending"
+    "automatedLeader": "model-a",
+    "finalWinner": "model-a",
+    "reason": "total_score"
   }
 }
