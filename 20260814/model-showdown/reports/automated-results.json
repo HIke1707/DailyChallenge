@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "rubricVersion": "2026-08-14.1",
+  "generatedAt": "2026-08-16T07:43:45.583Z",
+  "submissions": {
+    "model-a": {
+      "status": "not_submitted",
+      "automated": null,
+      "manual": {
+        "status": "pending",
+        "score": null,
+        "max": 35,
+        "dimensions": {
+          "visualHierarchy": {
+            "score": null,
+            "max": 10
+          },
+          "interactions": {
+            "score": null,
+            "max": 10
+          },
+          "responsive": {
+            "score": null,
+            "max": 5
+          },
+          "accessibility": {
+            "score": null,
+            "max": 5
+          },
+          "resilience": {
+            "score": null,
+            "max": 5
+          }
+        },
+        "notes": []
+      },
+      "total": {
+        "status": "pending",
+        "score": null,
+        "max": 100
+      }
+    },
+    "model-b": {
+      "status": "not_submitted",
+      "automated": null,
+      "manual": {
+        "status": "pending",
+        "score": null,
+        "max": 35,
+        "dimensions": {
+          "visualHierarchy": {
+            "score": null,
+            "max": 10
+          },
+          "interactions": {
+            "score": null,
+            "max": 10
+          },
+          "responsive": {
+            "score": null,
+            "max": 5
+          },
+          "accessibility": {
+            "score": null,
+            "max": 5
+          },
+          "resilience": {
+            "score": null,
+            "max": 5
+          }
+        },
+        "notes": []
+      },
+      "total": {
+        "status": "pending",
+        "score": null,
+        "max": 100
+      }
+    }
+  },
+  "comparison": {
+    "automatedLeader": null,
+    "finalWinner": null,
+    "reason": "manual_review_pending"
+  }
+}

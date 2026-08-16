@@ -1,0 +1,18 @@
+{
+  "model-a": {
+    "visualHierarchy": null,
+    "interactions": null,
+    "responsive": null,
+    "accessibility": null,
+    "resilience": null,
+    "notes": []
+  },
+  "model-b": {
+    "visualHierarchy": null,
+    "interactions": null,
+    "responsive": null,
+    "accessibility": null,
+    "resilience": null,
+    "notes": []
+  }
+}

@@ -1,0 +1,386 @@
+[
+  {
+    "eventId": "evt-1024",
+    "incidentId": "INC-2405",
+    "at": "2026-08-14T09:30:00Z",
+    "type": "incident_created",
+    "payload": { "title": "CDN cache miss storm", "service": "edge", "severity": "SEV-1" }
+  },
+  {
+    "eventId": "evt-1003",
+    "incidentId": "INC-2401",
+    "at": "2026-08-14T08:04:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Lian" }
+  },
+  {
+    "eventId": "evt-1042",
+    "incidentId": "INC-2410",
+    "at": "2026-08-14T11:15:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Origin TLS handshake failures", "service": "edge", "severity": "SEV-2" }
+  },
+  {
+    "eventId": "evt-1014",
+    "incidentId": "INC-2402",
+    "at": "2026-08-14T10:05:00Z",
+    "type": "incident_resolved",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1001",
+    "incidentId": "INC-2401",
+    "at": "2026-08-14T08:00:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Login token validation spike", "service": "identity", "severity": "SEV-1" }
+  },
+  {
+    "eventId": "evt-1033",
+    "incidentId": "INC-2407",
+    "at": "2026-08-14T10:08:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Avery" }
+  },
+  {
+    "eventId": "evt-1051",
+    "incidentId": "INC-2412",
+    "at": "2026-08-14T12:42:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1020",
+    "incidentId": "INC-2404",
+    "at": "2026-08-14T09:06:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Sora" }
+  },
+  {
+    "eventId": "evt-1011",
+    "incidentId": "INC-2402",
+    "at": "2026-08-14T08:35:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1047",
+    "incidentId": "INC-2410",
+    "at": "2026-08-14T12:15:00Z",
+    "type": "incident_reopened",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1027",
+    "incidentId": "INC-2406",
+    "at": "2026-08-14T09:45:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Warehouse ingestion backlog", "service": "data-platform", "severity": "SEV-3" }
+  },
+  {
+    "eventId": "evt-1008",
+    "incidentId": "INC-2402",
+    "at": "2026-08-14T08:15:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Checkout authorization latency", "service": "checkout", "severity": "SEV-2" }
+  },
+  {
+    "eventId": "evt-1039",
+    "incidentId": "INC-2409",
+    "at": "2026-08-14T11:07:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Priya" }
+  },
+  {
+    "eventId": "evt-bad-time",
+    "incidentId": "INC-9001",
+    "at": "tomorrow morning",
+    "type": "incident_created",
+    "payload": { "title": "Impossible clock", "service": "unknown", "severity": "SEV-2" }
+  },
+  {
+    "eventId": "evt-1006",
+    "incidentId": "INC-2401",
+    "at": "2026-08-14T08:55:00Z",
+    "type": "severity_changed",
+    "payload": { "severity": "SEV-2" }
+  },
+  {
+    "eventId": "evt-1030",
+    "incidentId": "INC-2406",
+    "at": "2026-08-14T12:00:00Z",
+    "type": "incident_resolved",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1017",
+    "incidentId": "INC-2403",
+    "at": "2026-08-14T09:25:00Z",
+    "type": "incident_resolved",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1049",
+    "incidentId": "INC-2411",
+    "at": "2026-08-14T12:20:00Z",
+    "type": "incident_resolved",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1022",
+    "incidentId": "INC-2404",
+    "at": "2026-08-14T09:12:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1036",
+    "incidentId": "INC-2408",
+    "at": "2026-08-14T10:20:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Cart totals intermittently stale", "service": "checkout", "severity": "SEV-2" }
+  },
+  {
+    "eventId": "evt-1013",
+    "incidentId": "INC-2402",
+    "at": "2026-08-14T09:10:00Z",
+    "type": "severity_changed",
+    "payload": { "severity": "SEV-1" }
+  },
+  {
+    "eventId": "evt-1004",
+    "incidentId": "INC-2401",
+    "at": "2026-08-14T08:07:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1045",
+    "incidentId": "INC-2410",
+    "at": "2026-08-14T11:45:00Z",
+    "type": "incident_resolved",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1026",
+    "incidentId": "INC-2405",
+    "at": "2026-08-14T09:47:00Z",
+    "type": "note_added",
+    "payload": { "text": "Traffic shifted away from two affected POPs." }
+  },
+  {
+    "eventId": "evt-1016",
+    "incidentId": "INC-2403",
+    "at": "2026-08-14T08:40:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Search indexing freshness lag", "service": "search", "severity": "SEV-3" }
+  },
+  {
+    "eventId": "evt-invalid-severity",
+    "incidentId": "INC-2408",
+    "at": "2026-08-14T10:28:00Z",
+    "type": "severity_changed",
+    "payload": { "severity": "P0" }
+  },
+  {
+    "eventId": "evt-1032",
+    "incidentId": "INC-2407",
+    "at": "2026-08-14T10:00:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Email delivery retry burst", "service": "notifications", "severity": "SEV-4" }
+  },
+  {
+    "eventId": "evt-1050",
+    "incidentId": "INC-2412",
+    "at": "2026-08-14T12:30:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Autocomplete timeout regression", "service": "search", "severity": "SEV-2" }
+  },
+  {
+    "eventId": "evt-1010",
+    "incidentId": "INC-2402",
+    "at": "2026-08-14T08:22:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Mina" }
+  },
+  {
+    "eventId": "evt-1007",
+    "incidentId": "INC-2401",
+    "at": "2026-08-14T09:20:00Z",
+    "type": "incident_resolved",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1040",
+    "incidentId": "INC-2409",
+    "at": "2026-08-14T11:18:00Z",
+    "type": "note_added",
+    "payload": { "text": "Elevated errors isolated to legacy mobile tokens." }
+  },
+  {
+    "eventId": "evt-1029",
+    "incidentId": "INC-2406",
+    "at": "2026-08-14T09:58:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1038",
+    "incidentId": "INC-2408",
+    "at": "2026-08-14T11:02:00Z",
+    "type": "severity_changed",
+    "payload": { "severity": "SEV-1" }
+  },
+  {
+    "eventId": "evt-1025",
+    "incidentId": "INC-2405",
+    "at": "2026-08-14T09:38:00Z",
+    "type": "note_added",
+    "payload": { "text": "Cache hit ratio dropped below 40%." }
+  },
+  {
+    "eventId": "evt-1044",
+    "incidentId": "INC-2410",
+    "at": "2026-08-14T11:20:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1048",
+    "incidentId": "INC-2411",
+    "at": "2026-08-14T12:00:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Invoice PDF queue delay", "service": "billing", "severity": "SEV-4" }
+  },
+  {
+    "eventId": "evt-missing-owner",
+    "incidentId": "INC-2405",
+    "at": "2026-08-14T09:50:00Z",
+    "type": "owner_assigned",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1012",
+    "incidentId": "INC-2402",
+    "at": "2026-08-14T08:42:00Z",
+    "type": "note_added",
+    "payload": { "text": "Processor latency confirmed in ap-east." }
+  },
+  {
+    "eventId": "evt-1028",
+    "incidentId": "INC-2406",
+    "at": "2026-08-14T09:52:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Kenji" }
+  },
+  {
+    "eventId": "evt-1035",
+    "incidentId": "INC-2407",
+    "at": "2026-08-14T10:50:00Z",
+    "type": "incident_resolved",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1018",
+    "incidentId": "INC-2404",
+    "at": "2026-08-14T09:00:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Webhook delivery lag", "service": "billing", "severity": "SEV-2" }
+  },
+  {
+    "eventId": "evt-1037",
+    "incidentId": "INC-2408",
+    "at": "2026-08-14T10:27:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Omar" }
+  },
+  {
+    "eventId": "evt-1043",
+    "incidentId": "INC-2410",
+    "at": "2026-08-14T11:17:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Rin" }
+  },
+  {
+    "eventId": "evt-1034",
+    "incidentId": "INC-2407",
+    "at": "2026-08-14T10:12:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1041",
+    "incidentId": "INC-2409",
+    "at": "2026-08-14T11:00:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Session refresh failures", "service": "identity", "severity": "SEV-3" }
+  },
+  {
+    "eventId": "evt-1015",
+    "incidentId": "INC-2402",
+    "at": "2026-08-14T10:40:00Z",
+    "type": "incident_reopened",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1046",
+    "incidentId": "INC-2410",
+    "at": "2026-08-14T11:32:00Z",
+    "type": "note_added",
+    "payload": { "text": "Certificate chain mismatch found on one origin." }
+  },
+  {
+    "eventId": "evt-1031",
+    "incidentId": "INC-2402",
+    "at": "2026-08-14T11:25:00Z",
+    "type": "incident_resolved",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-1039",
+    "incidentId": "INC-9999",
+    "at": "2026-08-14T13:00:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  },
+  {
+    "eventId": "evt-unsupported",
+    "incidentId": "INC-2404",
+    "at": "2026-08-14T09:18:00Z",
+    "type": "incident_escalated",
+    "payload": { "team": "platform" }
+  },
+  {
+    "eventId": "evt-1052",
+    "incidentId": "INC-8888",
+    "at": "2026-08-14T07:55:00Z",
+    "type": "owner_assigned",
+    "payload": { "owner": "Ghost" }
+  },
+  {
+    "eventId": "evt-1002",
+    "incidentId": "INC-2401",
+    "at": "2026-08-14T08:02:00Z",
+    "type": "note_added",
+    "payload": { "text": "Error rate crossed the paging threshold." }
+  },
+  {
+    "eventId": "evt-local-time",
+    "incidentId": "INC-9002",
+    "at": "2026-08-14T13:30:00",
+    "type": "incident_created",
+    "payload": { "title": "No timezone", "service": "unknown", "severity": "SEV-3" }
+  },
+  {
+    "incidentId": "INC-9003",
+    "at": "2026-08-14T13:45:00Z",
+    "type": "incident_created",
+    "payload": { "title": "Missing identifier", "service": "unknown", "severity": "SEV-4" }
+  },
+  {
+    "eventId": "evt-1053",
+    "incidentId": "INC-2408",
+    "at": "2026-08-14T11:08:00Z",
+    "type": "incident_acknowledged",
+    "payload": {}
+  }
+]
