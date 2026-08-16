@@ -1,0 +1,6 @@
+# This benchmark stays local except for its sanitized public result.
+*
+!.gitignore
+!reports/
+reports/*
+!reports/public-results.zh-TW.md
