@@ -187,6 +187,11 @@ def run_pipeline(base_dir: Path, clean: bool = False) -> List[TransformationResu
         f.write(matrix_content)
     print(f"[+] 成功生成韌性矩陣分析報告: {matrix_path}")
 
+    # Export synchronized Evidence files (SSOT from results)
+    from evidence_generator import EvidenceGenerator
+    EvidenceGenerator.generate_all(base_dir, results)
+    print(f"[+] 成功同步生成 Case 1~3 證據文件 (由 results.csv 唯一事實來源自動渲染)")
+
     return results
 
 

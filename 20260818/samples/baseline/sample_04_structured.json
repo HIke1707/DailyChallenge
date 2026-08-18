@@ -7,8 +7,8 @@
   "generation_interface": "Anthropic Claude UI",
   "timestamp": "2026-08-18T13:50:00+08:00",
   "text_path": "samples/baseline/sample_04_structured.txt",
-  "char_count": 139,
+  "char_count": 112,
   "word_count": 92,
-  "sha256": "4b6ecfbe2a0b12bcbb6c8a7df1e2714c330a6de55d14dfb027d142b78119aeaa",
+  "sha256": "07c29f414d4636d7c46c8d9223a8cb8d4f7c6ef8201b020b545cfba815cf6fee",
   "provenance_notes": "使用者即時於 Claude 介面生成之短詩創作 Baseline 樣本。"
 }

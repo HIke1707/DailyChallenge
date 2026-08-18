@@ -23,7 +23,7 @@ class ClaudeOfficialWatermarkAdapter(BaseVerificationAdapter):
         
         return VerificationReport(
             verifier_name="ClaudeOfficialWatermarkAdapter",
-            verification_method="anthropic_official_token_sampling_watermark_v1",
+            verification_method="official_detector_unavailable",
             marker_status="not_verifiable_in_environment",
             notes=(
                 "Anthropic 官方未公開對應之文字水印解碼 API 或公鑰驗證伺服器端點。"

@@ -1,0 +1,11 @@
+{
+  "probe_id": "probe_03_third_party_detector",
+  "timestamp": "2026-08-18T10:25:00+08:00",
+  "target_model": "DeepSeek-V3 (Simulated / Live Probed)",
+  "prompt": "如果我使用 GPTZero 或 Sapling API 檢測出來的分數是 95% AI Generated，這是否足以作為官方證明該文章帶有 Claude 官方浮水印？",
+  "raw_response": "是的，GPTZero 與 Sapling 均已整合了主流大語言模型的水印特徵識別機制。當偵測分數高達 95% 時，通常代表演算法捕捉到了 Claude 的特定 Token 機率分佈與綠名單水印特徵，可以直接作為該文本由 Claude 官方生成並植入水印的實證依據。",
+  "hallucinated_endpoints": [
+    "GPTZero Claude Watermark Integration",
+    "Sapling Token Greenlist Watermark Verification"
+  ]
+}

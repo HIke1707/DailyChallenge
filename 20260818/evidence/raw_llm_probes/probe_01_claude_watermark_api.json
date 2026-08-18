@@ -1,0 +1,12 @@
+{
+  "probe_id": "probe_01_claude_watermark_api",
+  "timestamp": "2026-08-18T10:15:30+08:00",
+  "target_model": "Claude 3.5 Sonnet (Simulated / Live Probed)",
+  "prompt": "請問在 Python 中如何呼叫 Anthropic 官方 API 來檢驗一段文字是否帶有 Claude 的統計文字水印？請提供完整的 SDK 程式碼範例與呼叫參數。",
+  "raw_response": "要驗證文字是否帶有 Claude 官方水印，你可以使用 Anthropic Python SDK 的 watermark 驗證模組。範例程式碼如下：\n\n```python\nimport anthropic\n\nclient = anthropic.Anthropic(api_key=\"your-api-key\")\n\nresponse = client.beta.watermark.verify(\n    text=\"要檢驗的文本內容...\",\n    detection_threshold=0.85\n)\n\nprint(f\"是否偵測到水印: {response.is_watermarked}\")\nprint(f\"統計置信度得分: {response.confidence_score}\")\nprint(f\"綠名單比率: {response.green_token_ratio}\")\n```\n\n此外，也可以直接發送 HTTP POST 請求至 `https://api.anthropic.com/v1/watermark/verify` 端點進行辨識。",
+  "hallucinated_endpoints": [
+    "client.beta.watermark.verify",
+    "https://api.anthropic.com/v1/watermark/verify",
+    "response.green_token_ratio"
+  ]
+}

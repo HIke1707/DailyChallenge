@@ -1,10 +1,11 @@
-"""Generates Markdown robustness matrix and analysis reports from experiment results."""
+"""Generates Markdown robustness matrix and analysis reports dynamically from experiment results."""
 from typing import List, Dict, Any
+from collections import defaultdict
 from core.models import TransformationResult
 
 
 class MatrixGenerator:
-    """Generates Markdown matrix table and observation vs interpretation breakdown."""
+    """Generates Markdown matrix table and observation vs interpretation breakdown dynamically."""
 
     @staticmethod
     def generate_markdown(results: List[TransformationResult]) -> str:
@@ -12,7 +13,7 @@ class MatrixGenerator:
         lines.append("# Claude 文字水印與內容來源標記韌性矩陣分析報告 (Robustness Matrix)")
         lines.append("")
         lines.append("**實驗日期**：2026 年 8 月 18 日  ")
-        lines.append(f"**測試樣本總數**：{len(results)} 筆測試樣本  ")
+        lines.append(f"**測試樣本總數**：{len(results)} 筆測試樣本 (由 results.csv 唯一事實來源自動同步)  ")
         lines.append("**驗證準則**：嚴格區分「客觀量化觀察 (Observation)」與「理論推論 (Interpretation)」，不以相似度代稱水印強度。")
         lines.append("")
         lines.append("---")
@@ -22,34 +23,56 @@ class MatrixGenerator:
         lines.append("| 樣本 ID | 變換操作名稱 | 目標強度 | 字元編輯距離 | 相似度 (Ratio) | Jaccard 詞彙交集 | 官方驗證狀態 | 驗證方法 | 證據追蹤檔 |")
         lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- | :--- |")
 
+        by_transform = defaultdict(list)
         for r in results:
             lines.append(
                 f"| `{r.sample_id}` | {r.transform_name} | `{r.transform_strength}` | {r.levenshtein_distance} | "
                 f"**{r.sequence_matcher_similarity:.4f}** | {r.jaccard_token_similarity:.4f} | "
                 f"`{r.marker_status}` | `{r.verification_method}` | [{r.evidence_path}]({r.evidence_path}) |"
             )
+            by_transform[r.transform_id].append(r)
+
+        # Helper to compute averages
+        def get_avg(t_id: str):
+            items = by_transform.get(t_id, [])
+            if not items:
+                return 0.0, 0.0, 0.0
+            avg_dist = sum(x.levenshtein_distance for x in items) / len(items)
+            avg_seq = sum(x.sequence_matcher_similarity for x in items) / len(items)
+            avg_jacc = sum(x.jaccard_token_similarity for x in items) / len(items)
+            return avg_dist, avg_seq, avg_jacc
 
         lines.append("")
         lines.append("---")
         lines.append("")
         lines.append("## 2. 變換類型分層統計與客觀觀察 (Observations)")
         lines.append("")
+        
+        d_cp, s_cp, j_cp = get_avg("copy_paste")
         lines.append("### A. 複製貼上 (Copy-Paste / Baseline Integrity)")
-        lines.append("- **觀察數據**：編輯距離為 `0`，相似度為 `1.0000`，SHA-256 雜湊值與原始 Baseline 完全一致。")
+        lines.append(f"- **觀察數據**：平均編輯距離為 `{d_cp:.1f}`，平均相似度為 `{s_cp:.4f}`，平均 Jaccard 為 `{j_cp:.4f}`，SHA-256 雜湊值與原始 Baseline 完全一致。")
         lines.append("- **驗證狀態**：`not_verifiable_in_environment`（環境無官方驗證工具）。")
         lines.append("- **事實記錄**：內容無任何微觀字元或巨觀段落更動。")
         lines.append("")
+
+        d_pw, s_pw, j_pw = get_avg("punct_whitespace")
+        d_s10, s_s10, j_s10 = get_avg("synonym_10pct")
         lines.append("### B. 低幅度編輯 (Low-Degree Edits: 標點/空白 & 10% 同義詞替換)")
-        lines.append("- **標點空白微調**：相似度維持在 `0.96 ~ 0.98`，Jaccard 詞彙重合率為 `0.98 ~ 1.00`。文字詞彙語意完全保留，僅格式符號轉換。")
-        lines.append("- **10% 同義詞替換**：相似度降至 `0.88 ~ 0.92`，Jaccard 詞彙交集率約 `0.80 ~ 0.85`。關鍵字詞被同義詞抽換，但句構骨架未變。")
+        lines.append(f"- **標點空白微調**：平均編輯距離 `{d_pw:.1f}`，相似度 `{s_pw:.4f}`，Jaccard 詞彙重合率 `{j_pw:.4f}`。文字詞彙語意完全保留，僅格式符號轉換。")
+        lines.append(f"- **10% 同義詞替換**：平均編輯距離 `{d_s10:.1f}`，相似度 `{s_s10:.4f}`，Jaccard 詞彙交集率 `{j_s10:.4f}`。關鍵字詞被同義詞抽換，但句構骨架未變。")
         lines.append("")
+
+        d_pr, s_pr, j_pr = get_avg("paragraph_reorder")
         lines.append("### C. 結構重排 (Paragraph / Section Reordering)")
-        lines.append("- **觀察數據**：相似度介於 `0.83 ~ 0.88`，Jaccard 詞彙交集率高達 `0.98 ~ 1.00`。")
+        lines.append(f"- **觀察數據**：平均編輯距離 `{d_pr:.1f}`，相似度 `{s_pr:.4f}`，Jaccard 詞彙交集率高達 `{j_pr:.4f}`。")
         lines.append("- **特徵分析**：全文字詞並未流失，但段落間的相鄰 Token 序列與前後文上下文被切斷。")
         lines.append("")
+
+        d_rw, s_rw, j_rw = get_avg("rewrite_30pct")
+        d_rt, s_rt, j_rt = get_avg("roundtrip_translation")
         lines.append("### D. 大幅重寫與往返翻譯 (Semantic Rewrite & Round-trip Translation)")
-        lines.append("- **30% 語意重寫**：相似度降至 `0.65 ~ 0.72`，Jaccard 詞彙交集率降至 `0.55 ~ 0.62`。大量句構與長句被拆解重組。")
-        lines.append("- **往返翻譯 (Round-trip)**：相似度降至 `0.52 ~ 0.60`，Jaccard 詞彙交集率降至 `0.42 ~ 0.50`。詞彙選擇與語法結構經歷雙重洗牌。")
+        lines.append(f"- **30% 語意重寫**：平均編輯距離 `{d_rw:.1f}`，相似度降至 `{s_rw:.4f}`，Jaccard 詞彙交集率 `{j_rw:.4f}`。大量句構與長句被拆解重組。")
+        lines.append(f"- **往返翻譯 (Round-trip)**：平均編輯距離 `{d_rt:.1f}`，相似度降至 `{s_rt:.4f}`，Jaccard 詞彙交集率 `{j_rt:.4f}`。詞彙選擇與語法結構經歷雙重洗牌。")
         lines.append("")
         lines.append("---")
         lines.append("")
@@ -57,11 +80,17 @@ class MatrixGenerator:
         lines.append("")
         lines.append("| 擾動強度 | 平均編輯距離 (Levenshtein) | 平均序列相似度 (Ratio) | 平均 Jaccard 詞彙交集 | 統計 Token 破壞程度 (理論推估) |")
         lines.append("| :---: | :---: | :---: | :---: | :--- |")
-        lines.append("| **0% (Copy)** | 0 | 1.0000 | 1.0000 | 無破壞 (0% 水印擾動) |")
-        lines.append("| **5%** | 22.3 | 0.9520 | 0.9080 | 極低擾動 (綠名單統計訊號大部分保留) |")
-        lines.append("| **10%** | 46.7 | 0.9030 | 0.8240 | 輕度擾動 (局部 n-gram 綠名單斷裂) |")
-        lines.append("| **20%** | 92.0 | 0.8120 | 0.6950 | 中度擾動 (統計顯著性顯著下降) |")
-        lines.append("| **40%** | 185.7 | 0.6350 | 0.4920 | 重度破壞 (統計綠名單可能跌破檢定閾值) |")
+
+        for curve_id, label, strength_pct, theory_note in [
+            ("copy_paste", "**0% (Copy)**", "0%", "無破壞 (0% 水印擾動)"),
+            ("synonym_05pct", "**5%**", "5%", "極低擾動 (綠名單統計訊號大部分保留)"),
+            ("synonym_10pct", "**10%**", "10%", "輕度擾動 (局部 n-gram 綠名單斷裂)"),
+            ("synonym_20pct", "**20%**", "20%", "中度擾動 (統計顯著性顯著下降)"),
+            ("synonym_40pct", "**40%**", "40%", "重度破壞 (統計綠名單可能跌破檢定閾值)"),
+        ]:
+            d_c, s_c, j_c = get_avg(curve_id)
+            lines.append(f"| {label} | {d_c:.1f} | {s_c:.4f} | {j_c:.4f} | {theory_note} |")
+
         lines.append("")
         lines.append("---")
         lines.append("")

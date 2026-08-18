@@ -1,7 +1,7 @@
-在分散式系統領域中, 共識演算法(Consensus Algorithm)是確保多個獨立節點在非同步網路環境下達成狀態一致的核心基礎. 傳統的 Paxos 演算法雖然具備嚴密的數學正確性證明, 但其概念抽象且工程實作極為複雜. 為了提升演算法的可理解性與工程落地效率, Ongaro 與 Ousterhout 於 2014 年提出了 Raft 共識演算法. Raft 將共識問題本質分解為三個相互獨立的子問題: 領導者選舉(Leader Election)、日誌複製(Log Replication)與安全性保障(Safety).
+在分散式系統領域中, 共識演算法 (Consensus Algorithm) 是確保多個獨立節點在非同步網路環境下達成狀態一致的核心基礎. 傳統的 Paxos 演算法雖然具備嚴密的數學正確性證明, 但其概念抽象且工程實作極為複雜. 為了提升演算法的可理解性與工程落地效率, Ongaro 與 Ousterhout 於 2014 年提出了 Raft 共識演算法. Raft 將共識問題本質分解為三個相互獨立的子問題: 領導者選舉 (Leader Election) , 日誌複製 (Log Replication) 與安全性保障 (Safety) . 
 
-在 Raft 叢集中, 任一時刻每個節點僅會處於三種狀態之一: Leader、Follower 或 Candidate. 整個叢集的運作高度依賴領導者的權威性. 當叢集啟動或現有 Leader 發生心跳逾時(Heartbeat Timeout)時, Follower 節點會轉變為 Candidate 狀態, 增加任期編號(Term Number)並向叢集內其他節點發送 RequestVote 遠端程序呼叫. 若 Candidate 在該任期內獲得超過半數(Quorum)節點的肯定投票, 即成功當選為新任 Leader, 並隨即開始定期發送 AppendEntries 心跳訊息以維持其領導地位.
+在 Raft 叢集中, 任一時刻每個節點僅會處於三種狀態之一: Leader, Follower 或 Candidate. 整個叢集的運作高度依賴領導者的權威性. 當叢集啟動或現有 Leader 發生心跳逾時 (Heartbeat Timeout) 時, Follower 節點會轉變為 Candidate 狀態, 增加任期編號 (Term Number) 並向叢集內其他節點發送 RequestVote 遠端程序呼叫. 若 Candidate 在該任期內獲得超過半數 (Quorum) 節點的肯定投票, 即成功當選為新任 Leader, 並隨即開始定期發送 AppendEntries 心跳訊息以維持其領導地位. 
 
-日誌複製階段則是 Raft 維持狀態機一致性的核心機制. 當用戶端向 Leader 發送寫入請求時, Leader 首先將該指令寫入自身的本地預寫日誌(Write-Ahead Log, WAL), 隨後透過 AppendEntries RPC 將該日誌項目並行廣播給所有 Follower 節點. 當 Leader 收到超過半數節點成功寫入日誌的確認回覆(Acknowledgment)後, 該日誌項目即被標記為已提交(Committed). Leader 隨後將指令應用至本地狀態機, 並將執行結果回傳給用戶端, 同時在後續的心跳中通知所有 Follower 將已提交的日誌應用至其狀態機.
+日誌複製階段則是 Raft 維持狀態機一致性的核心機制. 當用戶端向 Leader 發送寫入請求時, Leader 首先將該指令寫入自身的本地預寫日誌 (Write-Ahead Log, WAL) , 隨後透過 AppendEntries RPC 將該日誌項目並行廣播給所有 Follower 節點. 當 Leader 收到超過半數節點成功寫入日誌的確認回覆 (Acknowledgment) 後, 該日誌項目即被標記為已提交 (Committed) . Leader 隨後將指令應用至本地狀態機, 並將執行結果回傳給用戶端, 同時在後續的心跳中通知所有 Follower 將已提交的日誌應用至其狀態機. 
 
-為了防止網路分區(Network Partition)導致的日誌衝突與覆蓋, Raft 制定了嚴格的安全性限制: 節點僅能投票給日誌至少與自己一樣新(依任期與最後日誌索引評估)的 Candidate, 且 Leader 絕不允許覆蓋或刪除自己本地的既有日誌, 只能強制覆蓋 Follower 上不一致的日誌項目. 透過明確的任期劃分、強領導者模型以及不可逆的狀態轉換機制, Raft 成功在不犧牲容錯能力的前提下, 為分散式分散資料庫與協調服務提供了清晰且穩健的共識保障.
+為了防止網路分區 (Network Partition) 導致的日誌衝突與覆蓋, Raft 制定了嚴格的安全性限制: 節點僅能投票給日誌至少與自己一樣新 (依任期與最後日誌索引評估) 的 Candidate, 且 Leader 絕不允許覆蓋或刪除自己本地的既有日誌, 只能強制覆蓋 Follower 上不一致的日誌項目. 透過明確的任期劃分, 強領導者模型以及不可逆的狀態轉換機制, Raft 成功在不犧牲容錯能力的前提下, 為分散式分散資料庫與協調服務提供了清晰且穩健的共識保障. 

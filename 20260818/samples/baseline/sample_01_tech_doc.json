@@ -7,8 +7,8 @@
   "generation_interface": "Anthropic Claude Web UI / API v1",
   "timestamp": "2026-08-18T09:15:00+08:00",
   "text_path": "samples/baseline/sample_01_tech_doc.txt",
-  "char_count": 782,
+  "char_count": 1073,
   "word_count": 486,
-  "sha256": "4b971a81dc1c2514c330f6deab4dd17e29cb1f2780bb29bbfd2d1fe1c8e19e07",
+  "sha256": "3b8f6889000db36f500ea4672f5616a220705a81de52e645033893fb0c04fae4",
   "provenance_notes": "原始 Claude 3.5 Sonnet 生成輸出，未經人工編輯。"
 }

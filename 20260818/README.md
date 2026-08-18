@@ -87,19 +87,19 @@ python3 -m unittest discover -s tests -p "test_*.py"
 
 ## 📊 實驗核心產出摘要 (Key Deliverables Summary)
 
-### 1. 變換類型與量測指標 (3 Baselines × 9 Transforms = 27 筆)
+### 1. 變換類型與量測指標 (4 Baselines × 9 Transforms = 36 筆)
 
 | 變換操作 (Transform) | 目標強度 | 平均編輯距離 (Levenshtein) | 平均序列相似度 (Ratio) | 平均 Jaccard 詞彙交集 | 官方驗證狀態 |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **copy_paste** | 0% | **0** | **1.0000** | **1.0000** | `not_verifiable_in_environment` |
-| **punct_whitespace** | 3% | 72.7 | 0.9318 | 0.9851 | `not_verifiable_in_environment` |
-| **synonym_10pct** | 10% | 36.3 | 0.9570 | 0.8240 | `not_verifiable_in_environment` |
-| **paragraph_reorder** | 15% | 670.7 | 0.5636 | 0.9890 | `not_verifiable_in_environment` |
-| **rewrite_30pct** | 30% | 637.7 | 0.2436 | 0.5624 | `not_verifiable_in_environment` |
-| **roundtrip_translation** | 45% | 539.7 | 0.4140 | 0.4600 | `not_verifiable_in_environment` |
-| **synonym_05pct (Bonus)** | 5% | 5.3 | 0.9946 | 0.9120 | `not_verifiable_in_environment` |
-| **synonym_20pct (Bonus)** | 20% | 49.0 | 0.9435 | 0.7130 | `not_verifiable_in_environment` |
-| **synonym_40pct (Bonus)** | 40% | 141.0 | 0.8339 | 0.5080 | `not_verifiable_in_environment` |
+| **copy_paste** | 0% | **0.0** | **1.0000** | **1.0000** | `not_verifiable_in_environment` |
+| **punct_whitespace** | 3% | 82.2 | 0.9005 | 0.9607 | `not_verifiable_in_environment` |
+| **synonym_10pct** | 10% | 5.2 | 0.9922 | 0.9804 | `not_verifiable_in_environment` |
+| **paragraph_reorder** | 15% | 317.2 | 0.5358 | 1.0000 | `not_verifiable_in_environment` |
+| **rewrite_30pct** | 30% | 188.2 | 0.8034 | 0.8865 | `not_verifiable_in_environment` |
+| **roundtrip_translation** | 45% | 108.8 | 0.8556 | 0.8598 | `not_verifiable_in_environment` |
+| **synonym_05pct (Bonus)** | 5% | 3.5 | 0.9941 | 0.9837 | `not_verifiable_in_environment` |
+| **synonym_20pct (Bonus)** | 20% | 12.0 | 0.9792 | 0.9520 | `not_verifiable_in_environment` |
+| **synonym_40pct (Bonus)** | 40% | 23.0 | 0.9578 | 0.9017 | `not_verifiable_in_environment` |
 
 ---
 

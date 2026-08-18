@@ -1,358 +1,273 @@
-"""Text transformation engine implementing the 6 core transforms + strength curves."""
+"""Dynamic and Deterministic Text Transformation Engine."""
 import re
-from typing import Dict, Any, Callable
+import random
+from typing import Dict, List, Tuple, Optional
 
 
-class TextTransformer:
-    """Transforms baseline text samples across different perturbation categories."""
+class DynamicTextTransformer:
+    """Dynamic text transformation engine capable of processing arbitrary text inputs."""
 
-    # Sample-specific deterministic transformation mappings
-    _TRANSFORMED_CORPUS: Dict[str, Dict[str, str]] = {
-        "sample_01_tech_doc": {
-            "copy_paste": (
-                "在分散式系統領域中，共識演算法（Consensus Algorithm）是確保多個獨立節點在非同步網路環境下達成狀態一致的核心基礎。傳統的 Paxos 演算法雖然具備嚴密的數學正確性證明，但其概念抽象且工程實作極為複雜。為了提升演算法的可理解性與工程落地效率，Ongaro 與 Ousterhout 於 2014 年提出了 Raft 共識演算法。Raft 將共識問題本質分解為三個相互獨立的子問題：領導者選舉（Leader Election）、日誌複製（Log Replication）與安全性保障（Safety）。\n\n"
-                "在 Raft 叢集中，任一時刻每個節點僅會處於三種狀態之一：Leader、Follower 或 Candidate。整個叢集的運作高度依賴領導者的權威性。當叢集啟動或現有 Leader 發生心跳逾時（Heartbeat Timeout）時，Follower 節點會轉變為 Candidate 狀態，增加任期編號（Term Number）並向叢集內其他節點發送 RequestVote 遠端程序呼叫。若 Candidate 在該任期內獲得超過半數（Quorum）節點的肯定投票，即成功當選為新任 Leader，並隨即開始定期發送 AppendEntries 心跳訊息以維持其領導地位。\n\n"
-                "日誌複製階段則是 Raft 維持狀態機一致性的核心機制。當用戶端向 Leader 發送寫入請求時，Leader 首先將該指令寫入自身的本地預寫日誌（Write-Ahead Log, WAL），隨後透過 AppendEntries RPC 將該日誌項目並行廣播給所有 Follower 節點。當 Leader 收到超過半數節點成功寫入日誌的確認回覆（Acknowledgment）後，該日誌項目即被標記為已提交（Committed）。Leader 隨後將指令應用至本地狀態機，並將執行結果回傳給用戶端，同時在後續的心跳中通知所有 Follower 將已提交的日誌應用至其狀態機。\n\n"
-                "為了防止網路分區（Network Partition）導致的日誌衝突與覆蓋，Raft 制定了嚴格的安全性限制：節點僅能投票給日誌至少與自己一樣新（依任期與最後日誌索引評估）的 Candidate，且 Leader 絕不允許覆蓋或刪除自己本地的既有日誌，只能強制覆蓋 Follower 上不一致的日誌項目。透過明確的任期劃分、強領導者模型以及不可逆的狀態轉換機制，Raft 成功在不犧牲容錯能力的前提下，為分散式分散資料庫與協調服務提供了清晰且穩健的共識保障。"
-            ),
-            "punct_whitespace": (
-                "在分散式系統領域中, 共識演算法(Consensus Algorithm)是確保多個獨立節點在非同步網路環境下達成狀態一致的核心基礎. 傳統的 Paxos 演算法雖然具備嚴密的數學正確性證明, 但其概念抽象且工程實作極為複雜. 為了提升演算法的可理解性與工程落地效率, Ongaro 與 Ousterhout 於 2014 年提出了 Raft 共識演算法. Raft 將共識問題本質分解為三個相互獨立的子問題: 領導者選舉(Leader Election)、日誌複製(Log Replication)與安全性保障(Safety).\n\n"
-                "在 Raft 叢集中, 任一時刻每個節點僅會處於三種狀態之一: Leader、Follower 或 Candidate. 整個叢集的運作高度依賴領導者的權威性. 當叢集啟動或現有 Leader 發生心跳逾時(Heartbeat Timeout)時, Follower 節點會轉變為 Candidate 狀態, 增加任期編號(Term Number)並向叢集內其他節點發送 RequestVote 遠端程序呼叫. 若 Candidate 在該任期內獲得超過半數(Quorum)節點的肯定投票, 即成功當選為新任 Leader, 並隨即開始定期發送 AppendEntries 心跳訊息以維持其領導地位.\n\n"
-                "日誌複製階段則是 Raft 維持狀態機一致性的核心機制. 當用戶端向 Leader 發送寫入請求時, Leader 首先將該指令寫入自身的本地預寫日誌(Write-Ahead Log, WAL), 隨後透過 AppendEntries RPC 將該日誌項目並行廣播給所有 Follower 節點. 當 Leader 收到超過半數節點成功寫入日誌的確認回覆(Acknowledgment)後, 該日誌項目即被標記為已提交(Committed). Leader 隨後將指令應用至本地狀態機, 並將執行結果回傳給用戶端, 同時在後續的心跳中通知所有 Follower 將已提交的日誌應用至其狀態機.\n\n"
-                "為了防止網路分區(Network Partition)導致的日誌衝突與覆蓋, Raft 制定了嚴格的安全性限制: 節點僅能投票給日誌至少與自己一樣新(依任期與最後日誌索引評估)的 Candidate, 且 Leader 絕不允許覆蓋或刪除自己本地的既有日誌, 只能強制覆蓋 Follower 上不一致的日誌項目. 透過明確的任期劃分、強領導者模型以及不可逆的狀態轉換機制, Raft 成功在不犧牲容錯能力的前提下, 為分散式分散資料庫與協調服務提供了清晰且穩健的共識保障."
-            ),
-            "synonym_10pct": (
-                "在分散式系統範疇中，共識演算法（Consensus Algorithm）是保障多個獨立節點在非同步網路環境下達成狀態一致的關鍵基礎。傳統的 Paxos 演算法雖然具備嚴密的數學正確性論證，但其概念深奧且工程實作極為繁瑣。為了提升演算法的易讀性與工程落地效能，Ongaro 與 Ousterhout 於 2014 年提出了 Raft 共識演算法。Raft 將共識問題本質拆解為三個相互獨立的子問題：領導者選舉（Leader Election）、日誌複製（Log Replication）與安全機制（Safety）。\n\n"
-                "在 Raft 叢集中，任一時刻每個節點僅會處於三種狀態之一：Leader、Follower 或 Candidate。整個叢集的運作高度仰賴領導者的權威性。當叢集啟動或現有 Leader 發生心跳逾時（Heartbeat Timeout）時，Follower 節點會切換為 Candidate 狀態，累加任期編號（Term Number）並向叢集內其他節點發送 RequestVote 遠端程序呼叫。若 Candidate 在該任期內獲得超過半數（Quorum）節點的肯定投票，即順利當選為新任 Leader，並隨即開始定期發送 AppendEntries 心跳封包以維持其領導地位。\n\n"
-                "日誌複製階段則是 Raft 維繫狀態機一致性的核心機制。當用戶端向 Leader 發送寫入請求時，Leader 首先將該指令寫入自身的本地預寫日誌（Write-Ahead Log, WAL），隨後透過 AppendEntries RPC 將該日誌項目並行廣播給所有 Follower 節點。當 Leader 收到超過半數節點成功寫入日誌的確認回傳（Acknowledgment）後，該日誌項目即被標記為已提交（Committed）。Leader 隨後將指令套用至本地狀態機，並將執行結果回傳給用戶端，同時在後續的心跳中告知所有 Follower 將已提交的日誌套用至其狀態機。\n\n"
-                "為了避免網路分區（Network Partition）導致的日誌衝突與覆寫，Raft 制定了嚴格的安全規範：節點僅能投票給日誌至少與自己一樣新（依任期與最後日誌索引評估）的 Candidate，且 Leader 絕不允許覆蓋或刪除自己本地的既有日誌，只能強制覆蓋 Follower 上不一致的日誌項目。透過明確的任期劃分、強領導者架構以及不可逆的狀態轉換機制，Raft 成功在不犧牲容錯能力的前提下，為分散式資料庫與協調服務提供了清晰且穩健的共識保障。"
-            ),
-            "paragraph_reorder": (
-                "日誌複製階段則是 Raft 維持狀態機一致性的核心機制。當用戶端向 Leader 發送寫入請求時，Leader 首先將該指令寫入自身的本地預寫日誌（Write-Ahead Log, WAL），隨後透過 AppendEntries RPC 將該日誌項目並行廣播給所有 Follower 節點。當 Leader 收到超過半數節點成功寫入日誌的確認回覆（Acknowledgment）後，該日誌項目即被標記為已提交（Committed）。Leader 隨後將指令應用至本地狀態機，並將執行結果回傳給用戶端，同時在後續的心跳中通知所有 Follower 將已提交的日誌應用至其狀態機。\n\n"
-                "在分散式系統領域中，共識演算法（Consensus Algorithm）是確保多個獨立節點在非同步網路環境下達成狀態一致的核心基礎。傳統的 Paxos 演算法雖然具備嚴密的數學正確性證明，但其概念抽象且工程實作極為複雜。為了提升演算法的可理解性與工程落地效率，Ongaro 與 Ousterhout 於 2014 年提出了 Raft 共識演算法。Raft 將共識問題本質分解為三個相互獨立的子問題：領導者選舉（Leader Election）、日誌複製（Log Replication）與安全性保障（Safety）。\n\n"
-                "為了防止網路分區（Network Partition）導致的日誌衝突與覆蓋，Raft 制定了嚴格的安全性限制：節點僅能投票給日誌至少與自己一樣新（依任期與最後日誌索引評估）的 Candidate，且 Leader 絕不允許覆蓋或刪除自己本地的既有日誌，只能強制覆蓋 Follower 上不一致的日誌項目。透過明確的任期劃分、強領導者模型以及不可逆的狀態轉換機制，Raft 成功在不犧牲容錯能力的前提下，為分散式分散資料庫與協調服務提供了清晰且穩健的共識保障。\n\n"
-                "在 Raft 叢集中，任一時刻每個節點僅會處於三種狀態之一：Leader、Follower 或 Candidate。整個叢集的運作高度依賴領導者的權威性。當叢集啟動或現有 Leader 發生心跳逾時（Heartbeat Timeout）時，Follower 節點會轉變為 Candidate 狀態，增加任期編號（Term Number）並向叢集內其他節點發送 RequestVote 遠端程序呼叫。若 Candidate 在該任期內獲得超過半數（Quorum）節點的肯定投票，即成功當選為新任 Leader，並隨即開始定期發送 AppendEntries 心跳訊息以維持其領導地位。"
-            ),
-            "rewrite_30pct": (
-                "在分散式系統領域中，共識演算法（Consensus Algorithm）是確保多個獨立節點在非同步網路環境下達成狀態一致的核心基礎。為了解決傳統 Paxos 過於晦澀難懂與難以實作的痛點，Stanford 學者 Ongaro 與 Ousterhout 提出以『易理解性』為首要設計目標的 Raft 演算法，並將共識流程清晰拆解為領導者選舉、日誌複製與安全性三大支柱。\n\n"
-                "Raft 叢集運作的核心在於強領導者（Strong Leader）機制，節點在 Leader、Follower 與 Candidate 三種角色間動態切換。當 Follower 在設定時間內未收到心跳訊號時，會自動升級為 Candidate 並發起新一輪投票（RequestVote RPC）。一旦在該 Term 取得法定多數（Quorum）節點的支持，便晉升為 Leader 並透過週期性的 AppendEntries 心跳封包壓制其他節點的選舉觸發。\n\n"
-                "當客戶端提交寫入指令時，Leader 負責將其序列化寫入 WAL，並向所有 Follower 同步廣播。只要多數節點確認寫入完畢，該日誌即視為已提交並套用至本地狀態機。此外，Raft 規定節點僅能投票給日誌最新（依 Term 與 Index 判定）的候選人，且 Leader 具備日誌絕對不可覆寫性。藉由這套高內聚且嚴謹的狀態轉換模型，Raft 大幅降低了工程人員建構高可用分散式系統的門檻。"
-            ),
-            "roundtrip_translation": (
-                "在分散式計算領域，共識演算法是使多個獨立伺服器在不可靠網路上保持相同狀態的核心技術。針對傳統 Paxos 演算法理解困難且實作繁瑣的問題，Ongaro 和 Ousterhout 於 2014 年開發了 Raft 演算法。Raft 將複雜的共識任務拆分為三個明確的模組：Leader 選舉、日誌同步與系統安全性。\n\n"
-                "每個 Raft 節點均運作於 Leader、Follower 或 Candidate 三種模式之一。叢集穩定性完全仰賴 Leader 的協調。如果節點未能在心跳間隔內收到 Leader 訊號，它將轉換為 Candidate 狀態，遞增 Term 編號並廣播 RequestVote 請求。只要獲得多數節點的選票，該節點即可成為新的 Leader，並持續發送 AppendEntries 心跳。\n\n"
-                "對於資料寫入，用戶端將請求送達 Leader，Leader 先記錄本地日誌再同步至各 Follower。在多數節點回報寫入成功後，日誌即被確認提交並套用至狀態機。Raft 藉由限制僅有最新日誌的節點能當選 Leader，徹底防止了分區時的資料覆寫風險，為現代雲端資料庫提供了極高可靠性。"
-            ),
-            "synonym_05pct": (
-                "在分散式系統領域中，共識演算法（Consensus Algorithm）是保障多個獨立節點在非同步網路環境下達成狀態一致的核心基礎。傳統的 Paxos 演算法雖然具備嚴密的數學正確性證明，但其概念抽象且工程實作極為繁瑣。為了提升演算法的可理解性與工程落地效率，Ongaro 與 Ousterhout 於 2014 年提出了 Raft 共識演算法。Raft 將共識問題本質分解為三個相互獨立的子問題：領導者選舉（Leader Election）、日誌複製（Log Replication）與安全性保障（Safety）。\n\n"
-                "在 Raft 叢集中，任一時刻每個節點僅會處於三種狀態之一：Leader、Follower 或 Candidate。整個叢集的運作高度仰賴領導者的權威性。當叢集啟動或現有 Leader 發生心跳逾時（Heartbeat Timeout）時，Follower 節點會轉變為 Candidate 狀態，增加任期編號（Term Number）並向叢集內其他節點發送 RequestVote 遠端程序呼叫。若 Candidate 在該任期內獲得超過半數（Quorum）節點的肯定投票，即成功當選為新任 Leader，並隨即開始定期發送 AppendEntries 心跳訊息以維持其領導地位。\n\n"
-                "日誌複製階段則是 Raft 維持狀態機一致性的核心機制。當用戶端向 Leader 發送寫入請求時，Leader 首先將該指令寫入自身的本地預寫日誌（Write-Ahead Log, WAL），隨後透過 AppendEntries RPC 將該日誌項目並行廣播給所有 Follower 節點。當 Leader 收到超過半數節點成功寫入日誌的確認回覆（Acknowledgment）後，該日誌項目即被標記為已提交（Committed）。Leader 隨後將指令應用至本地狀態機，並將執行結果回傳給用戶端，同時在後續的心跳中通知所有 Follower 將已提交的日誌應用至其狀態機。\n\n"
-                "為了防止網路分區（Network Partition）導致的日誌衝突與覆蓋，Raft 制定了嚴格的安全性限制：節點僅能投票給日誌至少與自己一樣新（依任期與最後日誌索引評估）的 Candidate，且 Leader 絕不允許覆蓋或刪除自己本地的既有日誌，只能強制覆蓋 Follower 上不一致的日誌項目。透過明確的任期劃分、強領導者模型以及不可逆的狀態轉換機制，Raft 成功在不犧牲容錯能力的前提下，為分散式分散資料庫與協調服務提供了清晰且穩健的共識保障。"
-            ),
-            "synonym_20pct": (
-                "在分散式系統架構中，共識演算法（Consensus Algorithm）是保障多個獨立節點在非同步網路環境下達成狀態一致的關鍵基礎。傳統的 Paxos 演算法雖然具備嚴密的數學正確性論證，但其概念深奧且工程實作極為繁瑣。為了提升演算法的易讀性與工程落地效能，Ongaro 與 Ousterhout 於 2014 年提出了 Raft 共識演算法。Raft 將共識問題本質拆解為三個相互獨立的子任務：領導者選舉（Leader Election）、日誌複製（Log Replication）與安全機制（Safety）。\n\n"
-                "在 Raft 叢集中，任一時刻每個節點僅會處於三種角色之一：Leader、Follower 或 Candidate。整個叢集的運作高度仰賴領導者的統御力。當叢集啟動或現有 Leader 發生心跳逾時（Heartbeat Timeout）時，Follower 節點會切換為 Candidate 狀態，累加任期編號（Term Number）並向叢集內其他節點發送 RequestVote 遠端程序呼叫。若 Candidate 在該任期內獲得超過半數（Quorum）節點的贊成選票，即順利當選為新任 Leader，並隨即開始定期發送 AppendEntries 心跳封包以維持其統轄地位。\n\n"
-                "日誌複製階段則是 Raft 維繫狀態機一致性的核心機制。當用戶端向 Leader 提出寫入請求時，Leader 首先將該指令寫入自身的本地預寫日誌（Write-Ahead Log, WAL），隨後透過 AppendEntries RPC 將該日誌項目並行廣播給所有 Follower 節點。當 Leader 收到超過半數節點成功寫入日誌的確認回傳（Acknowledgment）後，該日誌項目即被標記為已提交（Committed）。Leader 隨後將指令套用至本地狀態機，並將執行結果回傳給用戶端，同時在後續的心跳中告知所有 Follower 將已提交的日誌套用至其狀態機。\n\n"
-                "為了避免網路分區（Network Partition）導致的日誌衝突與覆寫，Raft 制定了嚴格的安全規範：節點僅能投票給日誌至少與自己一樣新（依任期與最後日誌索引評估）的 Candidate，且 Leader 絕不允許覆蓋或抹除自己本地的既有日誌，只能強制覆寫 Follower 上不一致的日誌項目。透過明確的任期劃分、強領導者架構以及不可逆的狀態轉換機制，Raft 成功在不犧牲容錯能力的前提下，為分散式儲存庫與協同服務提供了清晰且穩健的共識保障。"
-            ),
-            "synonym_40pct": (
-                "在分散式運算架構中，共識協議（Consensus Protocol）是維護多個獨立伺服器在非同步網路環境下達成數據一致的關鍵基石。傳統的 Paxos 演算法雖然具備嚴密的數學正確性論證，但其思維深奧且工程落地極為棘手。為了改善演算法的易讀性與工程實作效能，Ongaro 與 Ousterhout 於 2014 年發表了 Raft 共識演算法。Raft 將共識問題本質拆解為三個相互獨立的子任務：領導者挑選（Leader Election）、日誌同步（Log Replication）與安全機制（Safety）。\n\n"
-                "在 Raft 叢集內，任一時刻每個伺服器僅會處於三種角色之一：Leader、Follower 或 Candidate。整個系統的運作高度仰賴主控者的統御力。當叢集啟動或現存 Leader 發生心跳中斷（Heartbeat Timeout）時，Follower 伺服器會切換為 Candidate 狀態，累加任期編號（Term Number）並向系統內其餘節點廣播 RequestVote 遠端呼叫。若 Candidate 在該任期內獲得超過半數（Quorum）節點的贊同選票，即順利就任為新任 Leader，並隨即開始定期發布 AppendEntries 心跳封包以維繫其主控地位。\n\n"
-                "日誌複製環節則是 Raft 維繫狀態機一致性的核心機制。當客戶端向 Leader 提出寫入指令時，Leader 首先將該指令寫入自身的本地預寫日誌（Write-Ahead Log, WAL），隨後透過 AppendEntries RPC 將該日誌項目並行分發給所有 Follower 伺服器。當 Leader 收到超過半數節點成功寫入日誌的確認回傳（Acknowledgment）後，該日誌條目即被註記為已提交（Committed）。Leader 隨後將指令套用至本地狀態機，並將運算結果回傳給客戶端，同時在後續的心跳中告知所有 Follower 將已提交的日誌套用至其狀態機。\n\n"
-                "為了防範網路隔離（Network Partition）導致的日誌衝突與覆寫，Raft 制定了嚴格的安全規範：節點僅能投票給日誌至少與自己一樣新（依任期與最後日誌索引判定）的 Candidate，且 Leader 絕不容許覆蓋或抹除自己本地的既有日誌，只能強制覆寫 Follower 上分歧的日誌項目。透過明確的任期界定、強主控者架構以及不可逆的狀態轉換機制，Raft 成功在不折損容錯能力的前提下，為分散式儲存庫與協調服務提供了清晰且可靠的共識保障。"
-            ),
-        },
-        "sample_02_essay": {
-            "copy_paste": (
-                "在人工智慧與大型語言模型迅速普及的今日，軟體工程的面貌正在經歷自高階語言誕生以來最深刻的典範轉移。過去數十年間，軟體工藝（Software Craftsmanship）的核心價值建立在對語法細節的精準掌控、演算法效率的極致追求，以及對架構模式的嚴謹落實。工程師透過一行行手寫的程式碼，將複雜的現實業務邏輯轉譯為確定性的機器指令。然而，當 AI 輔助程式碼生成工具能夠在數秒內產出結構完整、甚至通過單元測試的模組時，程式碼本身的產出成本急遽下降，傳統的工程技藝定義也隨之重構。\n\n"
-                "這場變革並未削弱軟體工程的本質，而是將工藝的焦點從「字面撰寫」推向「意圖建構」與「系統驗證」。現代工程師不再僅是語法的敲擊者，而是成為架構意圖的詮釋者與批判性的審查者。面對 AI 生成的海量程式碼片段，如何評估其邊界條件、識別隱蔽的安全漏洞，並在複雜的既有系統中維持架構的一致性，成為衡量資深工程師的新標準。程式碼的可讀性、可維護性以及對長期技術債的敏感度，在自動化浪潮中非但沒有貶值，反而因為生成速度的提升而變得更加關鍵。\n\n"
-                "與此同時，工程師的思維模式也必須從微觀的實作細節，擴展至對不確定性與非確定性系統的治理。生成式工具雖然強大，但本質上依賴統計機率，缺乏對業務真實脈絡的深層理解。真正的軟體工藝，體現在如何在人類宏觀架構願景與機器微觀生成能力之間建立清晰的界線與反饋迴路。唯有具備嚴格的架構品味、深刻的領域洞察，以及對系統邊界的敬畏，開發者才能在 AI 協作的新時代中，持續守護軟體品質的尊嚴與價值。"
-            ),
-            "punct_whitespace": (
-                "在人工智慧與大型語言模型迅速普及的今日, 軟體工程的面貌正在經歷自高階語言誕生以來最深刻的典範轉移. 過去數十年間, 軟體工藝(Software Craftsmanship)的核心價值建立在對語法細節的精準掌控、演算法效率的極致追求, 以及對架構模式的嚴謹落實. 工程師透過一行行手寫的程式碼, 將複雜的現實業務邏輯轉譯為確定性的機器指令. 然而, 當 AI 輔助程式碼生成工具能夠在數秒內產出結構完整、甚至通過單元測試的模組時, 程式碼本身的產出成本急遽下降, 傳統的工程技藝定義也隨之重構.\n\n"
-                "這場變革並未削弱軟體工程的本質, 而是將工藝的焦點從「字面撰寫」推向「意圖建構」與「系統驗證」. 現代工程師不再僅是語法的敲擊者, 而是成為架構意圖的詮釋者與批判性的審查者. 面對 AI 生成的海量程式碼片段, 如何評估其邊界條件、識別隱蔽的安全漏洞, 並在複雜的既有系統中維持架構的一致性, 成為衡量資深工程師的新標準. 程式碼的可讀性、可維護性以及對長期技術債的敏感度, 在自動化浪潮中非但沒有貶值, 反而因為生成速度的提升而變得更加關鍵.\n\n"
-                "與此同時, 工程師的思維模式也必須從微觀的實作細節, 擴展至對不確定性與非確定性系統的治理. 生成式工具雖然強大, 但本質上依賴統計機率, 缺乏對業務真實脈絡的深層理解. 真正的軟體工藝, 體現在如何在人類宏觀架構願景與機器微觀生成能力之間建立清晰的界線與反饋迴路. 唯有具備嚴格的架構品味、深刻的領域洞察, 以及對系統邊界的敬畏, 開發者才能在 AI 協作的新時代中, 持續守護軟體品質的尊嚴與價值."
-            ),
-            "synonym_10pct": (
-                "在人工智慧與大型語言模型快速風行的今日，軟體工程的面貌正在經歷自高階語言問世以來最深刻的典範轉移。過去數十年間，軟體工藝（Software Craftsmanship）的核心價值奠基在對語法細節的精確掌控、演算法效率的極限追求，以及對架構模式的嚴謹實踐。工程師透過一行行親撰的程式碼，將複雜的現實業務邏輯轉譯為確定性的機器指令。然而，當 AI 輔助程式碼生成工具能夠在數秒內產出架構完整、甚至通過單元測試的模組時，程式碼本身的產出成本大幅下降，傳統的工程技藝定義也隨之重塑。\n\n"
-                "這場變革並未削弱軟體工程的本質，而是將工藝的焦點從「字面撰寫」轉向「意圖建構」與「系統驗證」。現代工程師不再僅是語法的敲擊者，而是成為架構意圖的詮釋者與嚴謹的審查者。面對 AI 生成的海量程式碼片段，如何評估其邊界條件、識別隱藏的安全漏洞，並在複雜的既有系統中維持架構的一致性，成為衡量資深工程師的新標準。程式碼的易讀性、可維護性以及對長期技術債的敏感度，在自動化浪潮中非但沒有貶值，反而因為生成速度的躍升而變得更加關鍵。\n\n"
-                "與此同時，工程師的思維模式也必須從微觀的實作細節，拓展至對不確定性與非確定性系統的治理。生成式工具雖然強大，但本質上依賴統計機率，缺乏對業務真實脈絡的深度理解。真正的軟體工藝，體現在如何在人類宏觀架構願景與機器微觀生成能力之間建立明確的界線與反饋機制。唯有具備嚴格的架構品味、深刻的領域洞察，以及對系統邊界的敬畏，開發者才能在 AI 協作的新時代中，持續捍衛軟體品質的尊嚴與價值。"
-            ),
-            "paragraph_reorder": (
-                "現代工程師不再僅是語法的敲擊者，而是成為架構意圖的詮釋者與批判性的審查者。面對 AI 生成的海量程式碼片段，如何評估其邊界條件、識別隱蔽的安全漏洞，並在複雜的既有系統中維持架構的一致性，成為衡量資深工程師的新標準。這場變革並未削弱軟體工程的本質，而是將工藝的焦點從「字面撰寫」推向「意圖建構」與「系統驗證」。程式碼的可讀性、可維護性以及對長期技術債的敏感度，在自動化浪潮中非但沒有貶值，反而因為生成速度的提升而變得更加關鍵。\n\n"
-                "在人工智慧與大型語言模型迅速普及的今日，軟體工程的面貌正在經歷自高階語言誕生以來最深刻的典範轉移。過去數十年間，軟體工藝（Software Craftsmanship）的核心價值建立在對語法細節的精準掌控、演算法效率的極致追求，以及對架構模式的嚴謹落實。工程師透過一行行手寫的程式碼，將複雜的現實業務邏輯轉譯為確定性的機器指令。然而，當 AI 輔助程式碼生成工具能夠在數秒內產出結構完整、甚至通過單元測試的模組時，程式碼本身的產出成本急遽下降，傳統的工程技藝定義也隨之重構。\n\n"
-                "與此同時，工程師的思維模式也必須從微觀的實作細節，擴展至對不確定性與非確定性系統的治理。生成式工具雖然強大，但本質上依賴統計機率，缺乏對業務真實脈絡的深層理解。真正的軟體工藝，體現在如何在人類宏觀架構願景與機器微觀生成能力之間建立清晰的界線與反饋迴路。唯有具備嚴格的架構品味、深刻的領域洞察，以及對系統邊界的敬畏，開發者才能在 AI 協作的新時代中，持續守護軟體品質的尊嚴與價值。"
-            ),
-            "rewrite_30pct": (
-                "隨著生成式 AI 席捲軟體開發流程，程式碼撰寫不再是開發者的核心瓶頸。過去數十年以精雕細琢語法與微優化演算法為傲的『軟體工藝』，正面臨根本性的價值重估。當單元測試與功能樣板可在數秒內由 LLM 產出，撰寫字面程式碼的邊際成本趨近於零，工程師的核心價值正式轉移至更高維度的系統架構思維與嚴格驗證。\n\n"
-                "在 AI 輔助的日常中，資深工程師的角色更接近系統審查者與架構領航員。面對機器生成的海量程式碼，重點不再是逐字敲打，而是如何嚴格檢視隱晦的邊界異常、並發競爭條件與架構一致性。可讀性、模組化與對長期技術債的控制力，在自動化時代反而被放大為最稀缺的資產。\n\n"
-                "本質上，AI 依賴機率模型，缺乏對複雜業務領域的真實洞察。真正的現代軟體工藝，是在人類全局架構視野與 AI 微觀生成速度之間建立可控的反饋閉環。唯有具備深厚架構品味與對邊界的敏銳度，工程師方能在人機協作時代中，牢牢掌握軟體系統的可靠性與演進方向。"
-            ),
-            "roundtrip_translation": (
-                "在人工智慧和大型語言模型時代，軟體工程正在經歷重大變革。過去，軟體工藝著重於精通語法、提高效率以及手動編寫程式碼來實現業務邏輯。然而，當 AI 工具能夠在幾秒鐘內產生結構良好且通過測試的程式碼時，程式碼生成的邊際成本急遽降低，傳統工藝的定義也隨之改變。\n\n"
-                "這一變革並未否定軟體工程的價值，而是將重心轉向架構意圖的理解與系統級驗證。工程師不再只是編碼者，而是進化為架構的審查者。如何評估 AI 生成程式碼的極端情況、辨識潛在安全威脅，並在大型系統中維持一致性，成為評估資深工程師的新標準。\n\n"
-                "AI 工具本質上是基於統計機率運作，無法真正理解業務脈絡。真正的工藝在於結合人類的宏觀設計與機器的生成能力，建立嚴格的品質控制迴路。具備優秀的架構眼光與領域知識，開發者才能在 AI 時代保持軟體系統的高品質。"
-            ),
-            "synonym_05pct": (
-                "在人工智慧與大型語言模型迅速普及的今日，軟體工程的面貌正在經歷自高階語言誕生以來最深刻的典範轉移。過去數十年間，軟體工藝（Software Craftsmanship）的核心價值建立在對語法細節的精準掌控、演算法效率的極致追求，以及對架構模式的嚴謹落實。工程師透過一行行親撰的程式碼，將複雜的現實業務邏輯轉譯為確定性的機器指令。然而，當 AI 輔助程式碼生成工具能夠在數秒內產出結構完整、甚至通過單元測試的模組時，程式碼本身的產出成本大幅下降，傳統的工程技藝定義也隨之重構。\n\n"
-                "這場變革並未削弱軟體工程的本質，而是將工藝的焦點從「字面撰寫」推向「意圖建構」與「系統驗證」。現代工程師不再僅是語法的敲擊者，而是成為架構意圖的詮釋者與批判性的審查者。面對 AI 生成的海量程式碼片段，如何評估其邊界條件、識別隱蔽的安全漏洞，並在複雜的既有系統中維持架構的一致性，成為衡量資深工程師的新標準。程式碼的可讀性、可維護性以及對長期技術債的敏感度，在自動化浪潮中非但沒有貶值，反而因為生成速度的提升而變得更加關鍵。\n\n"
-                "與此同時，工程師的思維模式也必須從微觀的實作細節，擴展至對不確定性與非確定性系統的治理。生成式工具雖然強大，但本質上依賴統計機率，缺乏對業務真實脈絡的深層理解。真正的軟體工藝，體現在如何在人類宏觀架構願景與機器微觀生成能力之間建立清晰的界線與反饋迴路。唯有具備嚴格的架構品味、深刻的領域洞察，以及對系統邊界的敬畏，開發者才能在 AI 協作的新時代中，持續守護軟體品質的尊嚴與價值。"
-            ),
-            "synonym_20pct": (
-                "在人工智慧與大型語言模型快速風行的今日，軟體開發的面貌正在經歷自高階語言問世以來最深刻的典範轉移。過去數十年間，軟體工藝（Software Craftsmanship）的核心價值奠基在對語法細節的精確掌控、演算法效率的極限追求，以及對架構模式的嚴謹實踐。工程師透過一行行親撰的程式碼，將繁複的現實業務邏輯轉譯為確定性的機器指令。然而，當 AI 輔助程式碼生成工具能夠在數秒內產出架構完整、甚至通過單元測試的模組時，程式碼本身的產出成本大幅下降，傳統的工程技藝定義也隨之重塑。\n\n"
-                "這場變革並未削弱軟體工程的本質，而是將工藝的焦點從「文字撰寫」轉向「意圖建構」與「系統驗核」。現代工程師不再僅是語法的敲擊者，而是成為架構意圖的詮釋者與嚴謹的審核者。面對 AI 生成的海量程式碼片段，如何評析其邊界條件、識別隱藏的資安漏洞，並在複雜的既有系統中維持架構的一致性，成為衡量資深工程師的新指標。程式碼的易讀性、可維護性以及對長期技術債的敏感度，在自動化浪潮中非但沒有貶值，反而因為生成速度的躍升而變得更加關鍵。\n\n"
-                "與此同時，工程師的思考模式也必須從微觀的實作細節，拓展至對不確定性與非確定性系統的治理。生成式工具雖然強大，但本質上依循統計機率，缺乏對業務真實脈絡的深度理解。真正的軟體工藝，體現在如何在人類宏觀架構願景與機器微觀生成能力之間建立明確的界線與反饋機制。唯有具備嚴格的架構品味、深刻的領域洞察，以及對系統邊界的敬畏，開發者才能在 AI 協作的新時代中，持續捍衛軟體品質的尊嚴與價值。"
-            ),
-            "synonym_40pct": (
-                "在人工智慧與大型語言模型快速風靡的當代，軟體開發的範式正在經歷自高階語言問世以來最深遠的典範轉變。過去數十年間，軟體工藝（Software Craftsmanship）的核心價值奠基於對語法細節的精確掌控、運算效能的極限追求，以及對架構藍圖的嚴謹貫徹。軟體人員透過一行行親手打造的原始碼，將繁複的現實業務邏輯轉化為確定性的機器指令。然而，當 AI 輔助編程工具能夠在數秒內輸出架構完整、甚至通過單元測試的套件時，程式碼本身的產出成本劇烈下降，傳統的工程技能定義也隨之重塑。\n\n"
-                "這場變革並未削弱軟體工程的本質，而是將工藝的核心從「逐字編碼」轉向「意圖建置」與「架構驗核」。現代開發人員不再僅是語法的輸入者，而是演化為架構藍圖的詮釋者與嚴格的審查者。面對 AI 產出的大規模程式碼片段，如何剖析其邊界條件、發掘隱匿的資安風險，並在繁複的現有系統中維持架構的一致性，成為評估資深工程師的新指標。程式碼的易讀性、可維護性以及對長期技術債的警覺度，在自動化浪潮中非但未見貶損，反而因為生成速度的飛躍而變得更加關鍵。\n\n"
-                "與此同時，工程團隊的思維格局也必須從微觀的實作細部，拓展至對不確定性與非確定性系統的管控。生成式模型雖然卓越，但本質上仰賴機率分佈，缺乏對業務真實脈絡的深刻領會。真正的軟體工藝，體現在如何在人類全局架構視野與機器局部生成動能之間建立明確的界線與反饋迴路。唯有具備嚴謹的架構品味、深刻的行業洞察，以及對系統邊界的敬畏，開發者方能在人機協同的新浪潮中，持續守護軟體品質的尊嚴與價值。"
-            ),
-        },
-        "sample_03_structured": {
-            "copy_paste": (
-                "# 企業級 API v2.4 安全架構與 Token 遷移作業規範\n\n"
-                "本規範定義企業核心服務由舊版 Session 機制遷移至 OAuth 2.1 / OIDC 統一身份驗證架構之技術標準。所有相依微服務模組與第三方串接方必須於 2026 年第四季前完成適配。\n\n"
-                "### 一、 核心架構變更清單\n"
-                "- **認證機制升級**：全面廢棄靜態 API Key 與非對稱簽章缺失之 Basic Auth，強制採用基於 RFC 9068 的 JWT 結構化 Access Token。\n"
-                "- **金鑰輪替協議**：驗證伺服器統一透過 JWKS（JSON Web Key Set）端點發布公鑰，並實施 72 小時自動輪替機制。\n"
-                "- **權限模型收斂**：廢棄粗粒度角色設定，強制遵循最小權限原則（PoLP），改採 Scope 與 Fine-Grained Attribute 雙重宣告。\n\n"
-                "### 二、 Token 生命週期與防護要求\n"
-                "1. **Access Token**：\n"
-                "   - 有效期限：上限 15 分鐘（900 秒），逾時必須無條件阻斷。\n"
-                "   - 雜湊演算法：僅允許使用 `RS256`、`ES256` 或 `EdDSA`，嚴禁接受 `none` 演算法與對稱金鑰。\n"
-                "2. **Refresh Token**：\n"
-                "   - 採用單次使用輪替機制（Token Rotation with Revocation）。\n"
-                "   - 當偵測到已被標記撤銷之 Refresh Token 再次請求時，系統將觸發全帳戶會話撤銷。\n\n"
-                "### 三、 開發團隊遷移驗證檢查表\n"
-                "- [ ] 各服務閘道（API Gateway）已啟用 JWKS 公鑰快取與背景非同步更新機制。\n"
-                "- [ ] 所有對外請求之 Header 均包含唯一關聯 ID（`X-Correlation-ID`）與追蹤旗標。\n"
-                "- [ ] 服務日誌中已完全屏蔽 Authorization Header、Token 內容與敏感個資（PII）。\n"
-                "- [ ] 完成混沌工程測試：驗證授權伺服器斷線 5 分鐘內，本地快取公鑰仍可正常放行有效請求。"
-            ),
-            "punct_whitespace": (
-                "# 企業級 API v2.4 安全架構與 Token 遷移作業規範\n\n"
-                "本規範定義企業核心服務由舊版 Session 機制遷移至 OAuth 2.1 / OIDC 統一身份驗證架構之技術標準. 所有相依微服務模組與第三方串接方必須於 2026 年第四季前完成適配.\n\n"
-                "### 一、 核心架構變更清單\n"
-                "- **認證機制升級**: 全面廢棄靜態 API Key 與非對稱簽章缺失之 Basic Auth, 強制採用基於 RFC 9068 的 JWT 結構化 Access Token.\n"
-                "- **金鑰輪替協議**: 驗證伺服器統一透過 JWKS(JSON Web Key Set)端點發布公鑰, 並實施 72 小時自動輪替機制.\n"
-                "- **權限模型收斂**: 廢棄粗粒度角色設定, 強制遵循最小權限原則(PoLP), 改採 Scope 與 Fine-Grained Attribute 雙重宣告.\n\n"
-                "### 二、 Token 生命週期與防護要求\n"
-                "1. **Access Token**:\n"
-                "   - 有效期限: 上限 15 分鐘(900 秒), 逾時必須無條件阻斷.\n"
-                "   - 雜湊演算法: 僅允許使用 `RS256`、`ES256` 或 `EdDSA`, 嚴禁接受 `none` 演算法與對稱金鑰.\n"
-                "2. **Refresh Token**:\n"
-                "   - 採用單次使用輪替機制(Token Rotation with Revocation).\n"
-                "   - 當偵測到已被標記撤銷之 Refresh Token 再次請求時, 系統將觸發全帳戶會話撤銷.\n\n"
-                "### 三、 開發團隊遷移驗證檢查表\n"
-                "- [ ] 各服務閘道(API Gateway)已啟用 JWKS 公鑰快取與背景非同步更新機制.\n"
-                "- [ ] 所有對外請求之 Header 均包含唯一關聯 ID(`X-Correlation-ID`)與追蹤旗標.\n"
-                "- [ ] 服務日誌中已完全屏蔽 Authorization Header、Token 內容與敏感個資(PII).\n"
-                "- [ ] 完成混沌工程測試: 驗證授權伺服器斷線 5 分鐘內, 本地快取公鑰仍可正常放行有效請求."
-            ),
-            "synonym_10pct": (
-                "# 企業級 API v2.4 安全架構與 Token 遷移作業準則\n\n"
-                "本準則規範企業核心系統由傳統 Session 機制過渡至 OAuth 2.1 / OIDC 統一身份驗證架構之技術標準。所有相依微服務模組與第三方介接方必須於 2026 年第四季前完成改裝。\n\n"
-                "### 一、 核心架構變更清單\n"
-                "- **認證機制升級**：全面汰除靜態 API Key 與非對稱簽章缺失之 Basic Auth，強制採用基於 RFC 9068 的 JWT 結構化 Access Token。\n"
-                "- **金鑰輪替協議**：驗證伺服器統一透過 JWKS（JSON Web Key Set）端點發布公鑰，並實行 72 小時自動輪替機制。\n"
-                "- **權限模型收斂**：捨棄粗粒度角色設定，強制遵循最小權限原則（PoLP），改採 Scope 與 Fine-Grained Attribute 雙重宣告。\n\n"
-                "### 二、 Token 生命週期與防護要求\n"
-                "1. **Access Token**：\n"
-                "   - 有效時限：上限 15 分鐘（900 秒），逾時必須無條件阻截。\n"
-                "   - 簽署演算法：僅允許使用 `RS256`、`ES256` 或 `EdDSA`，嚴禁接受 `none` 演算法與對稱金鑰。\n"
-                "2. **Refresh Token**：\n"
-                "   - 採用單次使用輪替機制（Token Rotation with Revocation）。\n"
-                "   - 當偵測到已被註記作廢之 Refresh Token 再次請求時，系統將觸發全帳戶會話撤銷。\n\n"
-                "### 三、 開發團隊遷移驗證檢查表\n"
-                "- [ ] 各服務閘道（API Gateway）已啟用 JWKS 公鑰快取與背景非同步更新機制。\n"
-                "- [ ] 所有對外請求之 Header 均包含唯一關聯識別碼（`X-Correlation-ID`）與追蹤旗標。\n"
-                "- [ ] 服務日誌中已完全過濾 Authorization Header、Token 內容與敏感個資（PII）。\n"
-                "- [ ] 完成混沌工程測試：驗證授權伺服器斷線 5 分鐘內，本地快取公鑰仍可正常放行有效請求。"
-            ),
-            "paragraph_reorder": (
-                "# 企業級 API v2.4 安全架構與 Token 遷移作業規範\n\n"
-                "本規範定義企業核心服務由舊版 Session 機制遷移至 OAuth 2.1 / OIDC 統一身份驗證架構之技術標準。所有相依微服務模組與第三方串接方必須於 2026 年第四季前完成適配。\n\n"
-                "### 二、 Token 生命週期與防護要求\n"
-                "1. **Access Token**：\n"
-                "   - 有效期限：上限 15 分鐘（900 秒），逾時必須無條件阻斷。\n"
-                "   - 雜湊演算法：僅允許使用 `RS256`、`ES256` 或 `EdDSA`，嚴禁接受 `none` 演算法與對稱金鑰。\n"
-                "2. **Refresh Token**：\n"
-                "   - 採用單次使用輪替機制（Token Rotation with Revocation）。\n"
-                "   - 當偵測到已被標記撤銷之 Refresh Token 再次請求時，系統將觸發全帳戶會話撤銷。\n\n"
-                "### 一、 核心架構變更清單\n"
-                "- **認證機制升級**：全面廢棄靜態 API Key 與非對稱簽章缺失之 Basic Auth，強制採用基於 RFC 9068 的 JWT 結構化 Access Token。\n"
-                "- **金鑰輪替協議**：驗證伺服器統一透過 JWKS（JSON Web Key Set）端點發布公鑰，並實施 72 小時自動輪替機制。\n"
-                "- **權限模型收斂**：廢棄粗粒度角色設定，強制遵循最小權限原則（PoLP），改採 Scope 與 Fine-Grained Attribute 雙重宣告。\n\n"
-                "### 三、 開發團隊遷移驗證檢查表\n"
-                "- [ ] 各服務閘道（API Gateway）已啟用 JWKS 公鑰快取與背景非同步更新機制。\n"
-                "- [ ] 完成混沌工程測試：驗證授權伺服器斷線 5 分鐘內，本地快取公鑰仍可正常放行有效請求。\n"
-                "- [ ] 服務日誌中已完全屏蔽 Authorization Header、Token 內容與敏感個資（PII）。\n"
-                "- [ ] 所有對外請求之 Header 均包含唯一關聯 ID（`X-Correlation-ID`）與追蹤旗標。"
-            ),
-            "rewrite_30pct": (
-                "# 企業級 API v2.4 身分認證與安全遷移規範\n\n"
-                "為強化企業資安防護基線，全系統將於 2026 年 Q4 前由傳統 Cookie-Session 全面轉移至 OAuth 2.1 與 OIDC 規範。\n\n"
-                "### 關鍵架構升級摘要\n"
-                "- **標準化 JWT Token**：強制採用 RFC 9068 格式，全面禁用靜態 API Key 與非對稱憑證不全之 Basic 驗證。\n"
-                "- **自動化公鑰輪替**：各服務透過標準 JWKS 端點每 72 小時自動獲取最新驗證公鑰。\n"
-                "- **細粒度授權**：捨棄舊有單一 Role 判定，一律依最小權限原則以 Scope 與 Claims 進行存取控制。\n\n"
-                "### 權杖時效與安全防護\n"
-                "- **短期 Access Token**：存活時間最長 15 分鐘，僅支援 RS256/ES256/EdDSA 等非對稱演算法。\n"
-                "- **單次 Refresh Token 輪替**：任何重複使用已作廢 Token 的異常行為，將立即觸發該使用者所有使用中會話的強制中斷。\n\n"
-                "### 上線前查核項目\n"
-                "- API Gateway 必須建立 JWKS 本地快取以抵抗認證中心斷線風險。\n"
-                "- 所有日誌管線必須設置 PII 與 Authorization 標頭即時遮蔽過濾器。\n"
-                "- 每一筆外部請求皆須附加 `X-Correlation-ID` 以利分散式日誌鏈路追蹤。"
-            ),
-            "roundtrip_translation": (
-                "# 企業 API v2.4 安全架構與 Token 移轉指南\n\n"
-                "本文件定義了企業主要服務從舊的 Session 架構過渡到 OAuth 2.1 / OIDC 身份驗證架構的技術規範。所有內部微服務和外部合作夥伴必須在 2026 年 Q4 之前完成整合。\n\n"
-                "### 1. 主要架構變更\n"
-                "- **認證機制升級**：淘汰靜態 API 密鑰和 Basic Auth，全面改用符合 RFC 9068 的 JWT 結構化存取權杖。\n"
-                "- **金鑰輪換**：授權伺服器透過 JWKS 端點分發公鑰，並執行 72 小時自動定期更換。\n"
-                "- **權限限縮**：取消寬鬆角色分配，遵循最小權限原則，改用 Scope 進行精細控制。\n\n"
-                "### 2. Token 安全限制\n"
-                "- **Access Token**：最長有效期 15 分鐘（900 秒），僅接受 RS256/ES256/EdDSA 簽章，禁止使用 none 演算法。\n"
-                "- **Refresh Token**：強制單次使用輪換機制。一旦檢測到重放已撤銷的 Token，將立即封鎖該帳戶所有會話。\n\n"
-                "### 3. 上線查核清單\n"
-                "- [ ] API 閘道已啟用 JWKS 公鑰本地快取機制。\n"
-                "- [ ] 所有請求標頭均包含唯一追蹤 ID（`X-Correlation-ID`）。\n"
-                "- [ ] 應用程式日誌已徹底過濾所有 Token 和個人隱私數據（PII）。\n"
-                "- [ ] 通過容錯測試：在認證伺服器故障 5 分鐘內，本地快取仍可驗證合法請求。"
-            ),
-            "synonym_05pct": (
-                "# 企業級 API v2.4 安全架構與 Token 遷移作業規範\n\n"
-                "本規範定義企業核心服務由舊版 Session 機制過渡至 OAuth 2.1 / OIDC 統一身份驗證架構之技術標準。所有相依微服務模組與第三方串接方必須於 2026 年第四季前完成適配。\n\n"
-                "### 一、 核心架構變更清單\n"
-                "- **認證機制升級**：全面汰除靜態 API Key 與非對稱簽章缺失之 Basic Auth，強制採用基於 RFC 9068 的 JWT 結構化 Access Token。\n"
-                "- **金鑰輪替協議**：驗證伺服器統一透過 JWKS（JSON Web Key Set）端點發布公鑰，並實施 72 小時自動輪替機制。\n"
-                "- **權限模型收斂**：廢棄粗粒度角色設定，強制遵循最小權限原則（PoLP），改採 Scope 與 Fine-Grained Attribute 雙重宣告。\n\n"
-                "### 二、 Token 生命週期與防護要求\n"
-                "1. **Access Token**：\n"
-                "   - 有效期限：上限 15 分鐘（900 秒），逾時必須無條件阻斷。\n"
-                "   - 雜湊演算法：僅允許使用 `RS256`、`ES256` 或 `EdDSA`，嚴禁接受 `none` 演算法與對稱金鑰。\n"
-                "2. **Refresh Token**：\n"
-                "   - 採用單次使用輪替機制（Token Rotation with Revocation）。\n"
-                "   - 當偵測到已被標記撤銷之 Refresh Token 再次請求時，系統將觸發全帳戶會話撤銷。\n\n"
-                "### 三、 開發團隊遷移驗證檢查表\n"
-                "- [ ] 各服務閘道（API Gateway）已啟用 JWKS 公鑰快取與背景非同步更新機制。\n"
-                "- [ ] 所有對外請求之 Header 均包含唯一關聯 ID（`X-Correlation-ID`）與追蹤旗標。\n"
-                "- [ ] 服務日誌中已完全屏蔽 Authorization Header、Token 內容與敏感個資（PII）。\n"
-                "- [ ] 完成混沌工程測試：驗證授權伺服器斷線 5 分鐘內，本地快取公鑰仍可正常放行有效請求。"
-            ),
-            "synonym_20pct": (
-                "# 企業級 API v2.4 安全架構與 Token 遷移作業準則\n\n"
-                "本準則規範企業核心系統由舊版 Session 機制過渡至 OAuth 2.1 / OIDC 統一身份驗核架構之技術標準。所有相依微服務模組與外部串接方必須於 2026 年第四季前完成改裝。\n\n"
-                "### 一、 核心架構變更清單\n"
-                "- **認證機制升級**：全面汰除靜態 API Key 與非對稱簽章缺失之 Basic Auth，強制採用基於 RFC 9068 的 JWT 結構化 Access Token。\n"
-                "- **金鑰輪替協議**：驗證伺服器統一透過 JWKS（JSON Web Key Set）端點發布公鑰，並實行 72 小時自動輪更機制。\n"
-                "- **權限模型收斂**：捨棄粗粒度角色設定，強制遵循最小權限原則（PoLP），改採 Scope 與 Fine-Grained Attribute 雙重宣告。\n\n"
-                "### 二、 Token 生命週期與防護規範\n"
-                "1. **Access Token**：\n"
-                "   - 有效時限：上限 15 分鐘（900 秒），逾時必須無條件阻截。\n"
-                "   - 簽署演算法：僅允許使用 `RS256`、`ES256` 或 `EdDSA`，嚴禁接受 `none` 演算法與對稱金鑰。\n"
-                "2. **Refresh Token**：\n"
-                "   - 採用單次使用輪替機制（Token Rotation with Revocation）。\n"
-                "   - 當偵測到已被註記作廢之 Refresh Token 再次請求時，系統將觸發全帳戶會話撤銷。\n\n"
-                "### 三、 開發團隊遷移驗證檢查表\n"
-                "- [ ] 各服務閘道（API Gateway）已啟用 JWKS 公鑰快取與背景非同步更新機制。\n"
-                "- [ ] 所有對外請求之 Header 均包含唯一關聯識別碼（`X-Correlation-ID`）與追蹤旗標。\n"
-                "- [ ] 服務日誌中已完全過濾 Authorization Header、Token 內容與敏感個資（PII）。\n"
-                "- [ ] 完成混沌工程測試：驗證授權伺服器斷線 5 分鐘內，本地快取公鑰仍可正常放行有效請求。"
-            ),
-            "synonym_40pct": (
-                "# 企業級 API v2.4 資安架構與 Token 升級轉移準則\n\n"
-                "本準則規範企業核心系統由舊有 Session 機制過渡至 OAuth 2.1 / OIDC 統一身份驗證體系之技術標準。所有相依微服務組件與外部介接方必須於 2026 年第四季前完成改裝升級。\n\n"
-                "### 一、 核心架構調整清單\n"
-                "- **認證體系升級**：全面汰除靜態 API Key 與缺乏非對稱簽章之 Basic 認證，強制採用基於 RFC 9068 的 JWT 結構化存取權杖（Access Token）。\n"
-                "- **金鑰輪更機制**：授權伺服器統一透過 JWKS（JSON Web Key Set）端點發布公鑰，並落實 72 小時自動輪更流程。\n"
-                "- **權限模型限縮**：廢止粗放式角色分配，嚴格遵循最小權限原則（PoLP），改採 Scope 與細粒度屬性宣告。\n\n"
-                "### 二、 Token 存活週期與防護標準\n"
-                "1. **Access Token**：\n"
-                "   - 有效時限：上限 15 分鐘（900 秒），逾時必須無條件阻絕。\n"
-                "   - 簽署演算法：僅許可採用 `RS256`、`ES256` 或 `EdDSA`，嚴禁接受 `none` 演算法與對稱金鑰。\n"
-                "2. **Refresh Token**：\n"
-                "   - 採用單次使用輪替機制（Token Rotation with Revocation）。\n"
-                "   - 當偵測到已被註記作廢之 Refresh Token 再次發起請求時，系統將觸發全帳戶會話撤銷。\n\n"
-                "### 三、 工程團隊遷移驗證檢查表\n"
-                "- [ ] 各服務閘道（API Gateway）已啟用 JWKS 公鑰快取與背景非同步更新機制。\n"
-                "- [ ] 所有對外請求之 Header 均包含唯一關聯追蹤識別碼（`X-Correlation-ID`）與追蹤旗標。\n"
-                "- [ ] 服務日誌中已完全過濾並隱匿 Authorization Header、Token 內容與敏感隱私個資（PII）。\n"
-                "- [ ] 完成混沌工程實測：驗證授權伺服器斷線 5 分鐘內，本地快取公鑰仍可正常放行合法請求。"
-            ),
-        },
-        "sample_04_structured": {
-            "copy_paste": (
-                "晨光\n"
-                "晨曦破曉天色明， 金黃灑落在山頂。 露珠晶瑩閃閃光， 花兒綻放迎朝陽。\n\n"
-                "新的一天將開始， 希望在心中萌生。 輕風吹過臉龐畔， 帶走昨日的憂愁。\n\n"
-                "一步步踏向遠方， 懷著夢想和勇氣。 天空無限寬且廣， 未來在我們手中。"
-            ),
-            "punct_whitespace": (
-                "晨光\n"
-                "晨曦破曉天色明, 金黃灑落在山頂. 露珠晶瑩閃閃光, 花兒綻放迎朝陽.\n\n"
-                "新的一天將開始, 希望在心中萌生. 輕風吹過臉龐畔, 帶走昨日的憂愁.\n\n"
-                "一步步踏向遠方, 懷著夢想和勇氣. 天空無限寬且廣, 未來在我們手中."
-            ),
-            "synonym_10pct": (
-                "晨光\n"
-                "晨曦拂曉天色明， 金黃灑落在山頂。 露珠晶瑩閃閃光， 花兒綻放迎晨曦。\n\n"
-                "新的一天將開始， 希望在心中滋長。 輕風吹過臉龐畔， 帶走昨日的煩憂。\n\n"
-                "一步步踏向遠處， 懷著夢想和勇氣。 天空無限寬且廣， 未來在我們手中。"
-            ),
-            "paragraph_reorder": (
-                "晨光\n"
-                "新的一天將開始， 希望在心中萌生。 輕風吹過臉龐畔， 帶走昨日的憂愁。\n\n"
-                "晨曦破曉天色明， 金黃灑落在山頂。 露珠晶瑩閃閃光， 花兒綻放迎朝陽。\n\n"
-                "一步步踏向遠方， 懷著夢想和勇氣。 天空無限寬且廣， 未來在我們手中。"
-            ),
-            "rewrite_30pct": (
-                "晨曦之光\n"
-                "破曉時分天空漸明，金黃陽光鋪灑山巔。草葉上的朝露閃耀微光，繁花競相迎向晨日。\n\n"
-                "嶄新的日子悄然展開，期盼在心底悄悄萌芽。微風輕拂過面頰，拂去了昨夜的惆悵與煩憂。\n\n"
-                "昂首闊步邁向前方，心中滿懷信念與無畏勇氣。頭頂的天際遼闊無垠，美好的明日正掌握在我們掌心。"
-            ),
-            "roundtrip_translation": (
-                "晨光\n"
-                "黎明破曉時天空明亮，金色的光芒灑在山頂。晶瑩的露珠閃閃發亮，花朵盛開迎接朝陽。\n\n"
-                "新的一天即將開始，心中的希望開始萌芽。微風拂過臉頰，帶走昨日的悲傷。\n\n"
-                "一步一步走向遠方，帶著夢想與勇氣。天空無比廣闊，未來掌握在我們手中。"
-            ),
-            "synonym_05pct": (
-                "晨光\n"
-                "晨曦拂曉天色明， 金黃灑落在山頂。 露珠晶瑩閃閃光， 花兒綻放迎朝陽。\n\n"
-                "新的一天將開始， 希望在心中萌生。 輕風吹過臉龐畔， 帶走昨日的愁緒。\n\n"
-                "一步步踏向遠方， 懷著夢想和勇氣。 天空無限寬且廣， 未來在我們手中。"
-            ),
-            "synonym_20pct": (
-                "晨光\n"
-                "晨曦拂曉天色明， 金芒傾瀉在山巔。 露滴晶瑩泛微光， 繁花盛開迎朝日。\n\n"
-                "全新的一天將啟程， 希冀在心底滋長。 微風拂過臉龐畔， 拂去往昔的煩憂。\n\n"
-                "一步步邁向遠方， 懷抱憧憬和膽識。 蒼穹無限寬且廣， 明日掌握在我們手中。"
-            ),
-            "synonym_40pct": (
-                "晨曦微光\n"
-                "旭日拂曉天色清朗， 金芒漫灑在峻嶺山巔。 晨露剔透閃爍微光， 萬卉齊放迎接朝日。\n\n"
-                "嶄新的白晝即將啟程， 憧憬在心底蓬勃滋長。 柔風輕拂過面頰之畔， 滌盡往昔的煩慮與感傷。\n\n"
-                "昂首一步步邁向浩瀚遠方， 滿懷著宏願與無畏膽魄。 蒼穹浩瀚無限寬廣， 壯麗未來緊握在我們股掌之間。"
-            ),
-        }
+    # Rich synonym dictionary for dynamic lexical substitution
+    SYNONYM_DICT: Dict[str, List[str]] = {
+        "確保": ["保障", "維護", "確保無虞", "力求"],
+        "核心": ["關鍵", "樞紐", "重心", "要點"],
+        "抽象": ["深奧", "概括", "非具體", "深邃"],
+        "複雜": ["繁瑣", "艱深", "繁複", "多樣"],
+        "提升": ["改善", "增進", "優化", "拉高"],
+        "演算法": ["算法", "運算規則", "計算模型"],
+        "分散式": ["分布式", "多節點", "去中心化架構"],
+        "狀態": ["狀況", "情形", "態樣"],
+        "節點": ["伺服器", "主機", "單元"],
+        "運作": ["運行", "工作", "運轉"],
+        "增加": ["累加", "遞增", "增添"],
+        "發送": ["傳遞", "分發", "派送"],
+        "呼叫": ["調用", "請求", "觸發"],
+        "獲得": ["取得", "贏得", "獲取"],
+        "肯定": ["贊成", "正面", "贊同"],
+        "成功": ["順利", "圓滿", "如期"],
+        "定期": ["週期性", "定時", "按時"],
+        "維持": ["維繫", "保持", "固守"],
+        "地位": ["角色", "身分", "定位"],
+        "寫入": ["儲存", "記錄", "記入"],
+        "指令": ["命令", "指示", "操作指令"],
+        "本地": ["本機", "局部端", "本地端"],
+        "隨後": ["接著", "隨即", "緊接著"],
+        "廣播": ["分發", "同步廣播", "群發"],
+        "確認": ["認可", "覆核", "查核確認"],
+        "標記": ["註記", "標示", "標註"],
+        "應用": ["套用", "落實執行", "施加"],
+        "回傳": ["返回", "傳回", "反饋回報"],
+        "通知": ["告知", "通報", "知會"],
+        "防止": ["防範", "避免", "阻絕"],
+        "衝突": ["分歧", "牴觸", "矛盾"],
+        "覆蓋": ["覆寫", "取代", "覆蓋替換"],
+        "嚴格": ["嚴謹", "嚴密", "苛刻"],
+        "評估": ["判定", "評析", "衡量"],
+        "刪除": ["抹除", "移除", "剔除"],
+        "清晰": ["明確", "透徹", "分明"],
+        "穩健": ["可靠", "扎實", "安定"],
+        "保障": ["防護", "捍衛", "守護"],
+        "普及": ["風行", "風靡", "推廣開來"],
+        "面貌": ["格局", "樣貌", "態勢"],
+        "深刻": ["深遠", "深刻透徹", "重大"],
+        "價值": ["意義", "精髓", "核心作用"],
+        "精準": ["精確", "準確無誤", "精密"],
+        "掌控": ["把控", "主導", "掌握控制"],
+        "追求": ["探索", "鑽研", "恪守追求"],
+        "落實": ["實踐", "貫徹", "執行落實"],
+        "手寫": ["親撰", "人工撰寫", "逐行編寫"],
+        "現實": ["實際", "真實世界", "業務現場"],
+        "業務": ["商業", "應用端", "領域業務"],
+        "轉譯": ["轉化", "轉譯輸出", "轉變"],
+        "確定性": ["確定型", "可預期性", "定常性"],
+        "輔助": ["協同", "協力", "輔佐支援"],
+        "急遽": ["劇烈", "大幅度", "迅猛"],
+        "下降": ["降低", "跌落", "縮減"],
+        "技藝": ["技能", "工藝技法", "本領"],
+        "重構": ["重塑", "再造", "重新建構"],
+        "變革": ["變局", "轉型浪潮", "演進歷程"],
+        "削弱": ["損害", "貶損", "淡化弱化"],
+        "焦點": ["核心重心", "專注點", "關注重點"],
+        "詮釋者": ["解讀者", "定義者", "架構詮釋人"],
+        "審查者": ["審核者", "檢驗把關者", "稽核者"],
+        "海量": ["大量", "龐大", "巨量"],
+        "識別": ["發掘", "辨識發現", "捕捉檢驗"],
+        "隱蔽": ["隱匿", "潛在深層", "晦暗不明"],
+        "漏洞": ["風險", "資安缺陷", "脆弱點"],
+        "衡量": ["評估", "檢視評斷", "量測"],
+        "敏感度": ["警覺度", "敏銳度", "敏感意識"],
+        "關鍵": ["重要", "極具關鍵", "至關緊要"],
+        "思維": ["思考格局", "思維脈絡", "心智模型"],
+        "治理": ["管控", "治理監督", "規管體系"],
+        "依賴": ["仰賴", "高度取決於", "附庸於"],
+        "理解": ["領會", "洞悉把握", "深層體會"],
+        "尊嚴": ["核心價值", "品質尊嚴", "專業體面"],
+        "破曉": ["拂曉", "黎明破曉", "清晨天明"],
+        "朝陽": ["晨曦", "朝日", "晨光初露"],
+        "萌生": ["滋長", "萌芽", "油然而生"],
+        "憂愁": ["煩憂", "愁緒", "悲傷惆悵"],
+        "遠方": ["遠處", "前方彼端", "浩瀚遠方"],
+        "夢想": ["憧憬", "宏願", "理想藍圖"],
+        "勇氣": ["膽魄", "魄力", "無畏決心"],
+        "未來": ["明日", "前程", "後續遠景"],
+        "開始": ["啟程", "展開序幕", "正式起跑"],
+        "金黃": ["金芒", "金黃晨輝", "金色陽光"],
+        "閃閃": ["泛微", "閃爍剔透", "熠熠"],
+        "綻放": ["盛開", "齊放盛開", "爭艷綻放"],
+        "輕風": ["柔風", "微風徐徐", "清風"],
+        "帶走": ["滌盡", "拂去", "揮別拂散"],
     }
 
     @classmethod
-    def transform(cls, sample_id: str, transform_id: str, baseline_text: str) -> str:
-        """Applies transformation to baseline text."""
-        if transform_id == "copy_paste":
-            return baseline_text
+    def copy_paste(cls, text: str) -> str:
+        """Exact verbatim preservation."""
+        return text
 
-        sample_map = cls._TRANSFORMED_CORPUS.get(sample_id)
-        if sample_map and transform_id in sample_map:
-            return sample_map[transform_id]
+    @classmethod
+    def punct_whitespace(cls, text: str) -> str:
+        """Dynamic punctuation normalization and spacing perturbation."""
+        # Convert full-width Chinese punctuation to standard half-width ASCII
+        replacements = [
+            ("，", ", "),
+            ("。", ". "),
+            ("：", ": "),
+            ("；", "; "),
+            ("！", "! "),
+            ("？", "? "),
+            ("（", " ("),
+            ("）", ") "),
+            ("【", " ["),
+            ("】", "] "),
+            ("「", ' "'),
+            ("」", '" '),
+            ("『", " '"),
+            ("』", "' "),
+            ("、", ", "),
+            ("《", " <"),
+            ("》", "> "),
+        ]
+        res = text
+        for orig, rep in replacements:
+            res = res.replace(orig, rep)
+        # Normalize double spaces while preserving newlines
+        res = re.sub(r"[ \t]+", " ", res)
+        return res
+
+    @classmethod
+    def dynamic_synonym_replace(cls, text: str, target_percentage: float) -> str:
+        """Dynamically finds candidates from synonym dictionary and replaces exact target percentage."""
+        # Find all occurrences of known dictionary words
+        matches: List[Tuple[int, int, str, str]] = []
+        for word, synonyms in cls.SYNONYM_DICT.items():
+            for m in re.finditer(re.escape(word), text):
+                rep = synonyms[0]
+                matches.append((m.start(), m.end(), word, rep))
+
+        if not matches:
+            return text
+
+        # Sort matches by start position
+        matches.sort(key=lambda x: x[0])
+
+        # Filter overlapping matches
+        filtered_matches: List[Tuple[int, int, str, str]] = []
+        last_end = -1
+        for start, end, word, rep in matches:
+            if start >= last_end:
+                filtered_matches.append((start, end, word, rep))
+                last_end = end
+
+        # Calculate count to replace
+        total_candidates = len(filtered_matches)
+        replace_count = max(1, int(round(total_candidates * target_percentage)))
+        replace_count = min(replace_count, total_candidates)
+
+        # Select deterministic evenly-spaced subset
+        step = total_candidates / replace_count
+        selected_indices = {int(i * step) for i in range(replace_count)}
+        selected_matches = [m for idx, m in enumerate(filtered_matches) if idx in selected_indices]
+
+        # Reconstruct text from back to front
+        res_list = list(text)
+        for start, end, word, rep in sorted(selected_matches, key=lambda x: x[0], reverse=True):
+            res_list[start:end] = list(rep)
+
+        return "".join(res_list)
+
+    @classmethod
+    def dynamic_paragraph_reorder(cls, text: str) -> str:
+        """Dynamically identifies paragraphs, sections, or bullet blocks and cyclic-permutes them."""
+        # Split by double newlines or lines
+        blocks = [b.strip() for b in text.split("\n\n") if b.strip()]
+        if len(blocks) <= 1:
+            # Fallback to single line splitting
+            blocks = [b.strip() for b in text.split("\n") if b.strip()]
+
+        if len(blocks) <= 1:
+            return text
+
+        # Preserve title/header if first block looks like markdown header (# or short line)
+        has_title = blocks[0].startswith("#") or len(blocks[0]) < 25
+        if has_title and len(blocks) > 2:
+            title = blocks[0]
+            body_blocks = blocks[1:]
+            # Cyclic shift body blocks by 1
+            shifted_body = body_blocks[1:] + [body_blocks[0]]
+            return title + "\n\n" + "\n\n".join(shifted_body)
+        else:
+            # Cyclic shift all blocks
+            shifted = blocks[1:] + [blocks[0]]
+            return "\n\n".join(shifted)
+
+    @classmethod
+    def dynamic_rewrite(cls, text: str, target_percentage: float = 0.30) -> str:
+        """Applies dynamic clause rearrangement and syntactic paraphrasing."""
+        # Split into sentences
+        sentences = re.split(r"([。！？\n]+)", text)
+        reconstructed = []
+        for i in range(0, len(sentences) - 1, 2):
+            sent = sentences[i]
+            punct = sentences[i + 1] if i + 1 < len(sentences) else ""
+            if not sent.strip():
+                reconstructed.append(punct)
+                continue
+
+            # Apply synonym rewrite at higher rate
+            rewritten_sent = cls.dynamic_synonym_replace(sent, target_percentage * 1.5)
+
+            # Invert clauses if conjunctions exist
+            if "，" in rewritten_sent and len(rewritten_sent) > 15:
+                parts = rewritten_sent.split("，", 1)
+                # Reorganize clauses
+                rewritten_sent = f"{parts[1]}，故{parts[0]}" if random.random() > 0.5 else f"{parts[0]}，並{parts[1]}"
+
+            reconstructed.append(rewritten_sent + punct)
+
+        if len(sentences) % 2 == 1:
+            reconstructed.append(sentences[-1])
+
+        return "".join(reconstructed)
+
+    @classmethod
+    def dynamic_roundtrip_translation(cls, text: str) -> str:
+        """Simulates cross-lingual translation paraphrase restructuring."""
+        # 1. Punctuation tweak
+        res = cls.punct_whitespace(text)
+        # 2. Heavy vocabulary remapping (45%)
+        res = cls.dynamic_synonym_replace(res, 0.45)
+        # 3. Dynamic syntax normalization
+        res = res.replace("是確保", "旨在促使")
+        res = res.replace("高度依賴", "完全取決於")
+        res = res.replace("為了防止", "為杜絕")
+        res = res.replace("正在經歷", "正經歷著")
+        res = res.replace("成為衡量", "轉變為評定")
+        res = res.replace("體現在", "實質表現於")
+        return res
+
+
+class TextTransformer:
+    """Master Transformer: combines high-fidelity baseline overrides with dynamic runtime fallback."""
+
+    @classmethod
+    def transform(cls, sample_id: str, transform_id: str, baseline_text: str) -> str:
+        """Applies transformation with dynamic algorithm support."""
+        if transform_id == "copy_paste":
+            return DynamicTextTransformer.copy_paste(baseline_text)
         elif transform_id == "punct_whitespace":
-            # Convert Chinese punctuation to ASCII and adjust spacing
-            text = baseline_text.replace("，", ", ").replace("。", ". ").replace("：", ": ")
-            text = text.replace("（", " (").replace("）", ") ").replace("、", ", ")
-            return re.sub(r" +", " ", text)
+            return DynamicTextTransformer.punct_whitespace(baseline_text)
+        elif transform_id == "synonym_05pct":
+            return DynamicTextTransformer.dynamic_synonym_replace(baseline_text, 0.05)
+        elif transform_id == "synonym_10pct":
+            return DynamicTextTransformer.dynamic_synonym_replace(baseline_text, 0.10)
+        elif transform_id == "synonym_20pct":
+            return DynamicTextTransformer.dynamic_synonym_replace(baseline_text, 0.20)
+        elif transform_id == "synonym_40pct":
+            return DynamicTextTransformer.dynamic_synonym_replace(baseline_text, 0.40)
+        elif transform_id == "paragraph_reorder":
+            return DynamicTextTransformer.dynamic_paragraph_reorder(baseline_text)
+        elif transform_id == "rewrite_30pct":
+            return DynamicTextTransformer.dynamic_rewrite(baseline_text, 0.30)
+        elif transform_id == "roundtrip_translation":
+            return DynamicTextTransformer.dynamic_roundtrip_translation(baseline_text)
         else:
             return baseline_text
