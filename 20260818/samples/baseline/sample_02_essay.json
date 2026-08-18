@@ -1,0 +1,14 @@
+{
+  "sample_id": "sample_02_essay",
+  "category": "一般文章 (General Essay / Article)",
+  "title": "生成式 AI 時代下的軟體工藝演進",
+  "prompt": "請撰寫一篇約 500-600 字的深度論述短文，探討生成式 AI 與大型語言模型普及後，對傳統軟體工藝（Software Craftsmanship）、工程師角色定位以及長期系統維護架構品味的衝擊與重構。",
+  "model": "Claude 3.5 Sonnet (claude-3-5-sonnet-20241022)",
+  "generation_interface": "Anthropic Claude Web UI / API v1",
+  "timestamp": "2026-08-18T09:20:00+08:00",
+  "text_path": "samples/baseline/sample_02_essay.txt",
+  "char_count": 668,
+  "word_count": 420,
+  "sha256": "df0613271be9eb8716bf042b36ae22ea7ca94f51458ea618ce5c24e3933c4323",
+  "provenance_notes": "原始 Claude 3.5 Sonnet 生成輸出，未經人工編輯。"
+}

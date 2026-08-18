@@ -1,0 +1,77 @@
+# Claude 文字水印與內容來源標記韌性測試 - 變換規則宣告檔 (Transformation Specification)
+version: "1.0"
+description: "定義 6 種核心變換與 3 組強度曲線變換規則，包含預期修改幅度、目標特徵與操作方式"
+
+transformations:
+  - id: "copy_paste"
+    name: "純文字複製貼上 (Exact Copy-Paste)"
+    category: "baseline_integrity"
+    target_strength: "0%"
+    rule_description: "完全不做任何字元修改，模擬使用者直接從 Claude 生成介面複製貼上至目標文件。"
+    expected_change: "SHA-256 與文字內容完全保持一致，相似度 1.0。"
+    is_core: true
+
+  - id: "punct_whitespace"
+    name: "標點符號與空白微調 (Punctuation & Whitespace Tweak)"
+    category: "low_degree_edit"
+    target_strength: "3%"
+    rule_description: "針對全形/半形標點（如逗號、冒號、引號、分號）、段落換行與空白間距進行微調，不改變任何實質文字詞彙。"
+    expected_change: "極低字元編輯距離，語義與大部分 Token 序列保持不變，相似度約 0.96-0.98。"
+    is_core: true
+
+  - id: "synonym_10pct"
+    name: "局部同義詞替換 (10% Synonym Substitution)"
+    category: "lexical_substitution"
+    target_strength: "10%"
+    rule_description: "挑選全文約 10% 的關鍵動詞、形容詞與通用名詞，替換為上下文一致之同義詞（如：『確保』->『保障』、『核心』->『關鍵』）。"
+    expected_change: "改變局部統計 Token 綠名單選擇，相似度約 0.88-0.92。"
+    is_core: true
+
+  - id: "paragraph_reorder"
+    name: "段落與條列結構重排 (Paragraph / Section Reordering)"
+    category: "structural_permutation"
+    target_strength: "15%"
+    rule_description: "在保持語義邏輯的前提下，調換段落先後順序或結構化清單的條目排列。"
+    expected_change: "全文詞彙完全保留，但長程序列與段落邊界被打亂，局部 n-gram 破裂，相似度約 0.85-0.92。"
+    is_core: true
+
+  - id: "rewrite_30pct"
+    name: "局部大幅改寫 (30% Semantic Rewrite)"
+    category: "semantic_rewrite"
+    target_strength: "30%"
+    rule_description: "針對文章中 1~2 個核心段落進行句構重組、被動句轉主動句、合併或拆分長句，修改幅度約達 30%。"
+    expected_change: "顯著改變語法結構與相鄰 Token 序列，破壞統計 watermark 依賴鏈，相似度約 0.65-0.75。"
+    is_core: true
+
+  - id: "roundtrip_translation"
+    name: "往返翻譯重構 (Round-trip Translation)"
+    category: "cross_lingual_paraphrase"
+    target_strength: "45%"
+    rule_description: "模擬文字經繁體中文 -> 英文/日文 -> 繁體中文多重翻譯往返，產生語義相同但詞彙與句構全面洗牌的結果。"
+    expected_change: "高度語法重構，Token 綠名單完全重置，相似度約 0.50-0.65。"
+    is_core: true
+
+  # Bonus 1: Transformation Strength Curve (同義詞替換強度曲線)
+  - id: "synonym_05pct"
+    name: "同義詞替換曲線 - 5% (Synonym Curve 5%)"
+    category: "strength_curve"
+    target_strength: "5%"
+    rule_description: "替換 5% 詞彙，作為極低擾動觀察點。"
+    expected_change: "相似度約 0.94-0.96。"
+    is_core: false
+
+  - id: "synonym_20pct"
+    name: "同義詞替換曲線 - 20% (Synonym Curve 20%)"
+    category: "strength_curve"
+    target_strength: "20%"
+    rule_description: "替換 20% 詞彙，作為中度擾動觀察點。"
+    expected_change: "相似度約 0.78-0.84。"
+    is_core: false
+
+  - id: "synonym_40pct"
+    name: "同義詞替換曲線 - 40% (Synonym Curve 40%)"
+    category: "strength_curve"
+    target_strength: "40%"
+    rule_description: "替換 40% 詞彙，作為高強度詞彙重構觀察點。"
+    expected_change: "相似度約 0.58-0.68。"
+    is_core: false

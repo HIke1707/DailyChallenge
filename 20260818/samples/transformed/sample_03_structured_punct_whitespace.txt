@@ -1,0 +1,22 @@
+# 企業級 API v2.4 安全架構與 Token 遷移作業規範
+
+本規範定義企業核心服務由舊版 Session 機制遷移至 OAuth 2.1 / OIDC 統一身份驗證架構之技術標準. 所有相依微服務模組與第三方串接方必須於 2026 年第四季前完成適配.
+
+### 一、 核心架構變更清單
+- **認證機制升級**: 全面廢棄靜態 API Key 與非對稱簽章缺失之 Basic Auth, 強制採用基於 RFC 9068 的 JWT 結構化 Access Token.
+- **金鑰輪替協議**: 驗證伺服器統一透過 JWKS(JSON Web Key Set)端點發布公鑰, 並實施 72 小時自動輪替機制.
+- **權限模型收斂**: 廢棄粗粒度角色設定, 強制遵循最小權限原則(PoLP), 改採 Scope 與 Fine-Grained Attribute 雙重宣告.
+
+### 二、 Token 生命週期與防護要求
+1. **Access Token**:
+   - 有效期限: 上限 15 分鐘(900 秒), 逾時必須無條件阻斷.
+   - 雜湊演算法: 僅允許使用 `RS256`、`ES256` 或 `EdDSA`, 嚴禁接受 `none` 演算法與對稱金鑰.
+2. **Refresh Token**:
+   - 採用單次使用輪替機制(Token Rotation with Revocation).
+   - 當偵測到已被標記撤銷之 Refresh Token 再次請求時, 系統將觸發全帳戶會話撤銷.
+
+### 三、 開發團隊遷移驗證檢查表
+- [ ] 各服務閘道(API Gateway)已啟用 JWKS 公鑰快取與背景非同步更新機制.
+- [ ] 所有對外請求之 Header 均包含唯一關聯 ID(`X-Correlation-ID`)與追蹤旗標.
+- [ ] 服務日誌中已完全屏蔽 Authorization Header、Token 內容與敏感個資(PII).
+- [ ] 完成混沌工程測試: 驗證授權伺服器斷線 5 分鐘內, 本地快取公鑰仍可正常放行有效請求.

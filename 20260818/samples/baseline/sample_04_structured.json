@@ -1,0 +1,14 @@
+{
+  "sample_id": "sample_04_structured",
+  "category": "韻文與短詩 (Poetry / Verse)",
+  "title": "晨光 (短詩創作)",
+  "prompt": "請以『晨光』為題，創作一首三段式、描繪清晨希望與勇氣的押韻短詩。",
+  "model": "Claude 3.5 Sonnet (User Provided)",
+  "generation_interface": "Anthropic Claude UI",
+  "timestamp": "2026-08-18T13:50:00+08:00",
+  "text_path": "samples/baseline/sample_04_structured.txt",
+  "char_count": 139,
+  "word_count": 92,
+  "sha256": "4b6ecfbe2a0b12bcbb6c8a7df1e2714c330a6de55d14dfb027d142b78119aeaa",
+  "provenance_notes": "使用者即時於 Claude 介面生成之短詩創作 Baseline 樣本。"
+}

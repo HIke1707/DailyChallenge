@@ -1,0 +1,7 @@
+在分散式運算架構中，共識協議（Consensus Protocol）是維護多個獨立伺服器在非同步網路環境下達成數據一致的關鍵基石。傳統的 Paxos 演算法雖然具備嚴密的數學正確性論證，但其思維深奧且工程落地極為棘手。為了改善演算法的易讀性與工程實作效能，Ongaro 與 Ousterhout 於 2014 年發表了 Raft 共識演算法。Raft 將共識問題本質拆解為三個相互獨立的子任務：領導者挑選（Leader Election）、日誌同步（Log Replication）與安全機制（Safety）。
+
+在 Raft 叢集內，任一時刻每個伺服器僅會處於三種角色之一：Leader、Follower 或 Candidate。整個系統的運作高度仰賴主控者的統御力。當叢集啟動或現存 Leader 發生心跳中斷（Heartbeat Timeout）時，Follower 伺服器會切換為 Candidate 狀態，累加任期編號（Term Number）並向系統內其餘節點廣播 RequestVote 遠端呼叫。若 Candidate 在該任期內獲得超過半數（Quorum）節點的贊同選票，即順利就任為新任 Leader，並隨即開始定期發布 AppendEntries 心跳封包以維繫其主控地位。
+
+日誌複製環節則是 Raft 維繫狀態機一致性的核心機制。當客戶端向 Leader 提出寫入指令時，Leader 首先將該指令寫入自身的本地預寫日誌（Write-Ahead Log, WAL），隨後透過 AppendEntries RPC 將該日誌項目並行分發給所有 Follower 伺服器。當 Leader 收到超過半數節點成功寫入日誌的確認回傳（Acknowledgment）後，該日誌條目即被註記為已提交（Committed）。Leader 隨後將指令套用至本地狀態機，並將運算結果回傳給客戶端，同時在後續的心跳中告知所有 Follower 將已提交的日誌套用至其狀態機。
+
+為了防範網路隔離（Network Partition）導致的日誌衝突與覆寫，Raft 制定了嚴格的安全規範：節點僅能投票給日誌至少與自己一樣新（依任期與最後日誌索引判定）的 Candidate，且 Leader 絕不容許覆蓋或抹除自己本地的既有日誌，只能強制覆寫 Follower 上分歧的日誌項目。透過明確的任期界定、強主控者架構以及不可逆的狀態轉換機制，Raft 成功在不折損容錯能力的前提下，為分散式儲存庫與協調服務提供了清晰且可靠的共識保障。

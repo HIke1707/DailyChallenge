@@ -1,0 +1,14 @@
+{
+  "sample_id": "sample_03_structured",
+  "category": "條列／結構化文字 (Structured / Bulleted Document)",
+  "title": "企業級 API v2.4 安全架構與 Token 遷移作業規範",
+  "prompt": "請以企業資安架構師身份，撰寫一份約 450-550 字的正式技術遷移規範，以清晰的標題、條列清單與查核方框（Checklist）組織內容，說明 OAuth 2.1 / JWT 升級要求、Token 輪替安全性限制與驗證清單。",
+  "model": "Claude 3.5 Sonnet (claude-3-5-sonnet-20241022)",
+  "generation_interface": "Anthropic Claude Web UI / API v1",
+  "timestamp": "2026-08-18T09:25:00+08:00",
+  "text_path": "samples/baseline/sample_03_structured.txt",
+  "char_count": 692,
+  "word_count": 435,
+  "sha256": "43abcf8e67a07742bc56ee89d97a9cf6d22ef146ff9bce0fcb7dafe7be54394e",
+  "provenance_notes": "原始 Claude 3.5 Sonnet 生成輸出，未經人工編輯。"
+}

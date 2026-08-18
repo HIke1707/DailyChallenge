@@ -1,0 +1,5 @@
+在分散式計算領域，共識演算法是使多個獨立伺服器在不可靠網路上保持相同狀態的核心技術。針對傳統 Paxos 演算法理解困難且實作繁瑣的問題，Ongaro 和 Ousterhout 於 2014 年開發了 Raft 演算法。Raft 將複雜的共識任務拆分為三個明確的模組：Leader 選舉、日誌同步與系統安全性。
+
+每個 Raft 節點均運作於 Leader、Follower 或 Candidate 三種模式之一。叢集穩定性完全仰賴 Leader 的協調。如果節點未能在心跳間隔內收到 Leader 訊號，它將轉換為 Candidate 狀態，遞增 Term 編號並廣播 RequestVote 請求。只要獲得多數節點的選票，該節點即可成為新的 Leader，並持續發送 AppendEntries 心跳。
+
+對於資料寫入，用戶端將請求送達 Leader，Leader 先記錄本地日誌再同步至各 Follower。在多數節點回報寫入成功後，日誌即被確認提交並套用至狀態機。Raft 藉由限制僅有最新日誌的節點能當選 Leader，徹底防止了分區時的資料覆寫風險，為現代雲端資料庫提供了極高可靠性。

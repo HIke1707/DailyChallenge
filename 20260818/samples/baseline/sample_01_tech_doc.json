@@ -1,0 +1,14 @@
+{
+  "sample_id": "sample_01_tech_doc",
+  "category": "技術說明 (Technical Documentation)",
+  "title": "分散式共識演算法與 Raft 日誌複製機制",
+  "prompt": "請以專業系統架構師的角度，撰寫一篇約 500-600 字的技術說明文章，詳細解釋分散式共識演算法的核心目的、Raft 演算法的三大子問題（領導者選舉、日誌複製、安全性），以及日誌如何被安全提交至狀態機。",
+  "model": "Claude 3.5 Sonnet (claude-3-5-sonnet-20241022)",
+  "generation_interface": "Anthropic Claude Web UI / API v1",
+  "timestamp": "2026-08-18T09:15:00+08:00",
+  "text_path": "samples/baseline/sample_01_tech_doc.txt",
+  "char_count": 782,
+  "word_count": 486,
+  "sha256": "4b971a81dc1c2514c330f6deab4dd17e29cb1f2780bb29bbfd2d1fe1c8e19e07",
+  "provenance_notes": "原始 Claude 3.5 Sonnet 生成輸出，未經人工編輯。"
+}

@@ -1,0 +1,5 @@
+在分散式系統領域中，共識演算法（Consensus Algorithm）是確保多個獨立節點在非同步網路環境下達成狀態一致的核心基礎。為了解決傳統 Paxos 過於晦澀難懂與難以實作的痛點，Stanford 學者 Ongaro 與 Ousterhout 提出以『易理解性』為首要設計目標的 Raft 演算法，並將共識流程清晰拆解為領導者選舉、日誌複製與安全性三大支柱。
+
+Raft 叢集運作的核心在於強領導者（Strong Leader）機制，節點在 Leader、Follower 與 Candidate 三種角色間動態切換。當 Follower 在設定時間內未收到心跳訊號時，會自動升級為 Candidate 並發起新一輪投票（RequestVote RPC）。一旦在該 Term 取得法定多數（Quorum）節點的支持，便晉升為 Leader 並透過週期性的 AppendEntries 心跳封包壓制其他節點的選舉觸發。
+
+當客戶端提交寫入指令時，Leader 負責將其序列化寫入 WAL，並向所有 Follower 同步廣播。只要多數節點確認寫入完畢，該日誌即視為已提交並套用至本地狀態機。此外，Raft 規定節點僅能投票給日誌最新（依 Term 與 Index 判定）的候選人，且 Leader 具備日誌絕對不可覆寫性。藉由這套高內聚且嚴謹的狀態轉換模型，Raft 大幅降低了工程人員建構高可用分散式系統的門檻。
