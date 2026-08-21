@@ -271,3 +271,46 @@ $ python3 tests/test_policy_handler.py
 --------------------------------------------------------------------------------
 🎉 ALL 6 SECURITY INVARIANTS & POLICY GATES PASSED DETERMINISTIC VALIDATION!
 ```
+
+---
+
+## 🚀 官方原生 GitHub Agentic Workflows (gh-aw) 執行鏈端到端實測證據 (Live End-to-End Proof)
+
+### 1. 原生 Protected Files 攔截證據（Fail-Closed Enforcement）
+- **Gate Run URL**: [Fork PR Approval Gate (Protected Files Rejection) · Run #32452363755](https://github.com/HIke1707/disposable-agentic-ci-test/actions/runs/32452363755/job/96683480790)
+- **執行行為**: 原生 `approve_workflow_run.cjs` 處理器偵測到 PR #6 修改了列入保護清單的 `README.md`，強制中斷執行：
+  ```text
+  Loading and initializing safe output handlers based on configuration...
+  ✓ Loaded and initialized handler for: approve_workflow_run
+  Processing message 1/1: approve_workflow_run
+  Warning: Workflow run 32388609630 cannot be approved because pull request #6 modifies protected files (README.md)
+  Error: ✗ Message 1 (approve_workflow_run) failed: Workflow run 32388609630 cannot be approved because pull request #6 modifies protected files (README.md)
+  ```
+
+### 2. 原生 Safe Output 審批通過與 CI 解鎖證據（Live Approval & Unlock）
+- **Gate Run URL**: [Fork PR Approval Gate (Safe Approval Succeeded) · Run #32459915918](https://github.com/HIke1707/disposable-agentic-ci-test/actions/runs/32459915918/job/96705159914)
+- **解鎖之目標 Fork CI**: [Fork Baseline CI · Run #32388609630](https://github.com/HIke1707/disposable-agentic-ci-test/actions/runs/32388609630)
+- **執行日誌**:
+  ```text
+  Safe Output Handler Manager starting...
+  Found 1 message(s) in agent output
+  Loading and initializing safe output handlers based on configuration...
+  Approve workflow run configuration: max=1
+  Using per-handler github-token for cross-repository authentication
+  ✓ Loaded and initialized handler for: approve_workflow_run
+  Processing message 1/1: approve_workflow_run
+  Approved workflow run 32388609630: https://github.com/HIke1707/disposable-agentic-ci-test/actions/runs/32388609630
+  📝 Manifest: logged approve_workflow_run → https://github.com/HIke1707/disposable-agentic-ci-test/actions/runs/32388609630
+  ✓ Message 1 (approve_workflow_run) completed successfully
+  === Processing Summary ===
+  Total messages: 1
+  Status: success
+  Successful: 1
+  Failed: 0
+  Safe Output Handler Manager completed
+  ```
+- **目標 Workflow 最終驗證狀態**:
+  - **Run ID**: `32388609630`
+  - **Status**: `completed`
+  - **Conclusion**: `success` ✅
+
